@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Identity;
+
 namespace BoardyWeb.Models
 {
-    public class Usuario
+    public class Usuario : IdentityUser
     {
         public int UsuarioId { get; set; }
 
