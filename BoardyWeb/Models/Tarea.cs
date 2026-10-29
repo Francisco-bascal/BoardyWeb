@@ -22,10 +22,8 @@ namespace BoardyWeb.Models
         [Display(Name = "Orden")]
         public int Orden { get; set; }
 
-        [Required(ErrorMessage = "La prioridad es obligatoria")]
         [Display(Name = "Prioridad")]
-        [StringLength(50, ErrorMessage = "El {0} no puede superar los {1} caracteres.")]
-        public string Prioridad { get; set; } = string.Empty;
+        public PrioridadTarea Prioridad { get; set; } = PrioridadTarea.Media;
 
         public int ListaTareaId { get; set; }
 

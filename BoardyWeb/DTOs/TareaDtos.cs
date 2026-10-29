@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BoardyWeb.Models;
 
 namespace BoardyWeb.DTOs
 {
@@ -12,7 +13,7 @@ namespace BoardyWeb.DTOs
 
         public DateTime? FechaVencimiento { get; set; }
 
-        public string Prioridad { get; set; } = string.Empty;
+        public PrioridadTarea Prioridad { get; set; }
 
         public int Orden { get; set; }
 
@@ -48,9 +49,9 @@ namespace BoardyWeb.DTOs
         [DataType(DataType.Date)]
         public DateTime? FechaVencimiento { get; set; }
 
-        [Required(ErrorMessage = "La prioridad es obligatoria")]
+        [EnumDataType(typeof(PrioridadTarea), ErrorMessage = "La prioridad seleccionada no es válida.")]
         [Display(Name = "Prioridad")]
-        public string Prioridad { get; set; } = "Media";
+        public PrioridadTarea Prioridad { get; set; } = PrioridadTarea.Media;
 
         [Display(Name = "Estado")]
         [Range(1, int.MaxValue, ErrorMessage = "Debés seleccionar un estado.")]

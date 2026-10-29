@@ -117,6 +117,7 @@ namespace BoardyWeb.Data
             modelBuilder.Entity<Tarea>(entity =>
             {
                 entity.HasKey(t => t.TareaId);
+                entity.Property(t => t.Prioridad).HasConversion<string>().HasMaxLength(50);
                 entity.HasOne(t => t.ListaTarea).WithMany(l => l.Tareas).HasForeignKey(t => t.ListaTareaId).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(t => t.EstadoTarea).WithMany(e => e.Tareas).HasForeignKey(t => t.EstadoTareaId).OnDelete(DeleteBehavior.Restrict);
             });
@@ -138,7 +139,8 @@ namespace BoardyWeb.Data
             modelBuilder.Entity<Etiqueta>(entity =>
             {
                 entity.HasKey(e => e.EtiquetaId);
-                entity.HasIndex(e => e.Nombre).IsUnique();
+                entity.HasIndex(e => new { e.TableroId, e.Nombre }).IsUnique();
+                entity.HasOne(e => e.Tablero).WithMany(t => t.Etiquetas).HasForeignKey(e => e.TableroId).OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<TareaEtiqueta>(entity =>

@@ -15,6 +15,10 @@ namespace BoardyWeb.Models
         [RegularExpression("^#[0-9A-Fa-f]{6}$", ErrorMessage = "El color debe tener el formato hexadecimal #RRGGBB.")]
         public string Color { get; set; } = "#6C757D";
 
+        public int TableroId { get; set; }
+
+        public Tablero Tablero { get; set; } = null!;
+
         public ICollection<TareaEtiqueta> Tareas { get; set; } = new List<TareaEtiqueta>();
     }
 }

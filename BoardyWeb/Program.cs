@@ -1,5 +1,7 @@
+using BoardyWeb.Autorizacion;
 using BoardyWeb.Data;
 using BoardyWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +16,23 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddDefaultIdentity<Usuario>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(PoliticasTablero.VerTablero, politica => politica.AddRequirements(
+        new RolTableroRequirement(RolesTablero.Propietario, RolesTablero.Administrador, RolesTablero.Operario, RolesTablero.Lector)));
+
+    options.AddPolicy(PoliticasTablero.ColaborarEnTablero, politica => politica.AddRequirements(
+        new RolTableroRequirement(RolesTablero.Propietario, RolesTablero.Administrador, RolesTablero.Operario)));
+
+    options.AddPolicy(PoliticasTablero.AdministrarTablero, politica => politica.AddRequirements(
+        new RolTableroRequirement(RolesTablero.Propietario, RolesTablero.Administrador)));
+
+    options.AddPolicy(PoliticasTablero.GestionarTablero, politica => politica.AddRequirements(
+        new RolTableroRequirement(RolesTablero.Propietario)));
+});
+
+builder.Services.AddScoped<IAuthorizationHandler, RolTableroHandler>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddRazorPages();

@@ -1,3 +1,4 @@
+using BoardyWeb.Autorizacion;
 using BoardyWeb.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,10 +19,10 @@ namespace BoardyWeb.Data
 
             await SeedRolesIdentityAsync(scope.ServiceProvider);
             await SeedEstadosTareaAsync(context);
-            await SeedEtiquetasAsync(context);
             await SeedRolesMiembroAsync(context);
             var administrador = await SeedAdministradorAsync(scope.ServiceProvider);
             await SeedTableroDemoAsync(context, administrador);
+            await SeedEtiquetasTableroDemoAsync(context);
         }
 
         private static async Task SeedRolesIdentityAsync(IServiceProvider services)
@@ -53,18 +54,20 @@ namespace BoardyWeb.Data
             await context.SaveChangesAsync();
         }
 
-        private static async Task SeedEtiquetasAsync(AppDbContext context)
+        private static async Task SeedEtiquetasTableroDemoAsync(AppDbContext context)
         {
-            if (await context.Etiquetas.AnyAsync())
+            var tablero = await context.Tableros.OrderBy(t => t.TableroId).FirstOrDefaultAsync();
+
+            if (tablero is null || await context.Etiquetas.AnyAsync(e => e.TableroId == tablero.TableroId))
             {
                 return;
             }
 
             context.Etiquetas.AddRange(
-                new Etiqueta { Nombre = "Bug", Descripcion = "Error a corregir.", Color = "#DC3545" },
-                new Etiqueta { Nombre = "Mejora", Descripcion = "Mejora funcional.", Color = "#0D6EFD" },
-                new Etiqueta { Nombre = "Urgente", Descripcion = "Requiere atención inmediata.", Color = "#FD7E14" },
-                new Etiqueta { Nombre = "Documentación", Descripcion = "Trabajo de documentación.", Color = "#6C757D" });
+                new Etiqueta { TableroId = tablero.TableroId, Nombre = "Bug", Descripcion = "Error a corregir.", Color = "#DC3545" },
+                new Etiqueta { TableroId = tablero.TableroId, Nombre = "Mejora", Descripcion = "Mejora funcional.", Color = "#0D6EFD" },
+                new Etiqueta { TableroId = tablero.TableroId, Nombre = "Urgente", Descripcion = "Requiere atención inmediata.", Color = "#FD7E14" },
+                new Etiqueta { TableroId = tablero.TableroId, Nombre = "Documentación", Descripcion = "Trabajo de documentación.", Color = "#6C757D" });
 
             await context.SaveChangesAsync();
         }
@@ -77,10 +80,10 @@ namespace BoardyWeb.Data
             }
 
             context.RolMiembros.AddRange(
-                new RolMiembro { Nombre = "Propietario", Descripcion = "Dueño del tablero." },
-                new RolMiembro { Nombre = "Administrador", Descripcion = "Crea y administra tareas del tablero." },
-                new RolMiembro { Nombre = "Operario", Descripcion = "Marca tareas como finalizadas, agrega etiquetas y comentarios." },
-                new RolMiembro { Nombre = "Lector", Descripcion = "Solo consulta el tablero." });
+                new RolMiembro { Nombre = RolesTablero.Propietario, Descripcion = "Dueño del tablero." },
+                new RolMiembro { Nombre = RolesTablero.Administrador, Descripcion = "Crea y administra tareas del tablero." },
+                new RolMiembro { Nombre = RolesTablero.Operario, Descripcion = "Marca tareas como finalizadas, agrega etiquetas y comentarios." },
+                new RolMiembro { Nombre = RolesTablero.Lector, Descripcion = "Solo consulta el tablero." });
 
             await context.SaveChangesAsync();
         }
@@ -127,7 +130,7 @@ namespace BoardyWeb.Data
             }
 
             var estados = await context.EstadoTareas.OrderBy(e => e.EstadoTareaId).ToListAsync();
-            var rolPropietario = await context.RolMiembros.FirstAsync(r => r.Nombre == "Propietario");
+            var rolPropietario = await context.RolMiembros.FirstAsync(r => r.Nombre == RolesTablero.Propietario);
 
             var tablero = new Tablero
             {
@@ -158,7 +161,7 @@ namespace BoardyWeb.Data
             {
                 Titulo = "Definir el alcance del tablero",
                 Descripcion = "Acordar con el equipo las columnas y el flujo de trabajo.",
-                Prioridad = "Alta",
+                Prioridad = PrioridadTarea.Alta,
                 Orden = 1,
                 EstadoTareaId = estados[0].EstadoTareaId
             });
@@ -167,7 +170,7 @@ namespace BoardyWeb.Data
             {
                 Titulo = "Cargar las etiquetas del proyecto",
                 Descripcion = "Revisar el catálogo de etiquetas disponibles.",
-                Prioridad = "Media",
+                Prioridad = PrioridadTarea.Media,
                 Orden = 2,
                 EstadoTareaId = estados[0].EstadoTareaId
             });
@@ -176,7 +179,7 @@ namespace BoardyWeb.Data
             {
                 Titulo = "Implementar el tablero kanban",
                 Descripcion = "Mostrar listas y tarjetas con su estado actual.",
-                Prioridad = "Alta",
+                Prioridad = PrioridadTarea.Alta,
                 Orden = 1,
                 FechaVencimiento = DateTime.UtcNow.AddDays(7),
                 EstadoTareaId = estados[1].EstadoTareaId
@@ -186,7 +189,7 @@ namespace BoardyWeb.Data
             {
                 Titulo = "Configurar Identity",
                 Descripcion = "Registro, inicio de sesión y roles de usuario.",
-                Prioridad = "Alta",
+                Prioridad = PrioridadTarea.Alta,
                 Orden = 1,
                 EstadoTareaId = estados[3].EstadoTareaId
             });
