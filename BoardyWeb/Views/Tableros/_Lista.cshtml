@@ -11,19 +11,19 @@
     }
     else
     {
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+        <div class="tableros-grilla" style="--tableros-n: @Math.Clamp(Model.Count, 1, 3)">
             @foreach (var tablero in Model)
             {
-                <div class="col">
-                    <div class="card card-interactiva h-100">
+                <div>
+                    <div class="card card-interactiva tablero-tarjeta h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center gap-2 mb-2">
                                 <span class="avatar avatar-lg"><i class="bi bi-kanban"></i></span>
-                                <h2 class="h6 mb-0">
+                                <h2 class="h5 mb-0">
                                     <a asp-controller="Tableros" asp-action="Detalle" asp-route-id="@tablero.TableroId" class="stretched-link text-body">@tablero.Nombre</a>
                                 </h2>
                             </div>
-                            <p class="text-suave small mb-0">@(string.IsNullOrWhiteSpace(tablero.Descripcion) ? "Sin descripción." : tablero.Descripcion)</p>
+                            <p class="text-suave mb-0">@(string.IsNullOrWhiteSpace(tablero.Descripcion) ? "Sin descripción." : tablero.Descripcion)</p>
                         </div>
                         <div class="card-footer bg-transparent border-top-0 pt-0 text-suave small">
                             <i class="bi bi-calendar3 me-1"></i>Creado el @tablero.FechaCreacion.ToString("dd/MM/yyyy")

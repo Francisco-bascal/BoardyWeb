@@ -845,3 +845,30 @@ a {
 .btn-ojo {
   text-decoration: none;
 }
+
+/* Panel de tableros: 1 = ancho completo, 2 = mitades, 3 o más = tercios (los siguientes pasan a la fila de abajo). */
+.tableros-grilla {
+  display: grid;
+  grid-template-columns: repeat(var(--tableros-n, 3), minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.tablero-tarjeta {
+  min-height: 11rem;
+}
+
+.tablero-tarjeta .card-body {
+  padding: 1.5rem;
+}
+
+.tablero-tarjeta .avatar-lg {
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 767.98px) {
+  .tableros-grilla {
+    grid-template-columns: 1fr;
+  }
+}
