@@ -9,9 +9,8 @@ namespace BoardyWeb.Services
 
         Task<ResultadoOperacion<TableroMiembroDto>> AgregarAsync(int tableroId, AgregarMiembroDto dto, CancellationToken cancellationToken = default);
 
-        Task<ResultadoOperacion<TableroMiembroDto>> AsignarRolAsync(int tableroId, int tableroMiembroId, AsignarRolDto dto, CancellationToken cancellationToken = default);
-
-        Task<ResultadoOperacion<TableroMiembroDto>> QuitarRolAsync(int tableroId, int tableroMiembroId, int rolMiembroId, CancellationToken cancellationToken = default);
+        /// <summary>Cambia el rol de un miembro: el nuevo rol reemplaza al anterior (un único rol por miembro).</summary>
+        Task<ResultadoOperacion<TableroMiembroDto>> CambiarRolAsync(int tableroId, int tableroMiembroId, AsignarRolDto dto, CancellationToken cancellationToken = default);
 
         Task<ResultadoOperacion> QuitarAsync(int tableroId, int tableroMiembroId, CancellationToken cancellationToken = default);
     }

@@ -167,20 +167,16 @@ namespace BoardyWeb.Services
 
             var ahora = DateTime.UtcNow;
 
-            // Todo se persiste en un único SaveChanges: nunca queda un tablero sin propietario.
+            // Cada miembro tiene un único rol. Todo se persiste en un único SaveChanges, de modo que
+            // nunca queda un tablero sin propietario: el nuevo propietario pasa a Propietario y el
+            // anterior a Administrador.
             tablero.PropietarioId = destino.UsuarioId;
+
+            _context.MiembrosPorRol.RemoveRange(destino.Roles);
             destino.Roles.Add(new MiembrosPorRol { RolMiembroId = rolPropietario.RolMiembroId, FechaAsignacion = ahora });
 
-            var asignacionPropietario = actual.Roles.FirstOrDefault(r => r.RolMiembroId == rolPropietario.RolMiembroId);
-            if (asignacionPropietario is not null)
-            {
-                _context.MiembrosPorRol.Remove(asignacionPropietario);
-            }
-
-            if (!actual.Roles.Any(r => r.RolMiembroId == rolAdministrador.RolMiembroId))
-            {
-                actual.Roles.Add(new MiembrosPorRol { RolMiembroId = rolAdministrador.RolMiembroId, FechaAsignacion = ahora });
-            }
+            _context.MiembrosPorRol.RemoveRange(actual.Roles);
+            actual.Roles.Add(new MiembrosPorRol { RolMiembroId = rolAdministrador.RolMiembroId, FechaAsignacion = ahora });
 
             await _context.SaveChangesAsync(cancellationToken);
 

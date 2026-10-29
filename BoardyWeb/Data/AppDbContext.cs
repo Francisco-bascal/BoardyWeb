@@ -95,7 +95,8 @@ namespace BoardyWeb.Data
             modelBuilder.Entity<MiembrosPorRol>(entity =>
             {
                 entity.HasKey(m => m.MiembroPorRolId);
-                entity.HasIndex(m => new { m.TableroMiembroId, m.RolMiembroId }).IsUnique();
+                // Un miembro tiene un único rol en el tablero.
+                entity.HasIndex(m => m.TableroMiembroId).IsUnique();
                 entity.HasOne(m => m.TableroMiembro).WithMany(tm => tm.Roles).HasForeignKey(m => m.TableroMiembroId).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(m => m.RolMiembro).WithMany(r => r.Miembros).HasForeignKey(m => m.RolMiembroId).OnDelete(DeleteBehavior.Restrict);
             });

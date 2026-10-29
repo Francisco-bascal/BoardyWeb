@@ -40,14 +40,7 @@
                         <td>
                             @foreach (var rol in miembro.Roles)
                             {
-                                <span class="chip me-1">
-                                    @rol.Nombre
-                                    @if (editable && miembro.Roles.Count > 1)
-                                    {
-                                        <button type="button" class="btn-close ms-1" style="font-size: .5rem" aria-label="Quitar rol"
-                                                data-accion-url="@Url.Action("QuitarRol", "Miembros", new { tableroId, tableroMiembroId = miembro.TableroMiembroId, rolMiembroId = rol.RolMiembroId })"></button>
-                                    }
-                                </span>
+                                <span class="chip me-1">@rol.Nombre</span>
                             }
                         </td>
                         <td class="text-end">
@@ -60,10 +53,11 @@
                             @if (editable)
                             {
                                 <div class="d-inline-flex gap-1 align-items-center">
-                                    <form asp-action="AsignarRol" asp-route-tableroId="@tableroId" asp-route-tableroMiembroId="@miembro.TableroMiembroId" method="post"
+                                    <form asp-action="CambiarRol" asp-route-tableroId="@tableroId" asp-route-tableroMiembroId="@miembro.TableroMiembroId" method="post"
                                           class="d-inline-flex gap-1" data-ajax="true" data-ajax-method="post" data-ajax-success="ajaxFormExito" data-ajax-failure="ajaxFormFallo">
-                                        <select name="RolMiembroId" class="form-select form-select-sm" asp-items="roles"></select>
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Asignar</button>
+                                        <select name="RolMiembroId" class="form-select form-select-sm" aria-label="Rol de @miembro.NombreCompleto"
+                                                asp-items="new SelectList(roles?.Items, nameof(RolMiembroDto.RolMiembroId), nameof(RolMiembroDto.Nombre), miembro.Roles.FirstOrDefault()?.RolMiembroId)"></select>
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Cambiar rol</button>
                                     </form>
                                     <button type="button" class="btn btn-sm btn-outline-danger"
                                             data-accion-url="@Url.Action("Quitar", "Miembros", new { tableroId, tableroMiembroId = miembro.TableroMiembroId })"

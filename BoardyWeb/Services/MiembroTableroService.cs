@@ -64,7 +64,7 @@ namespace BoardyWeb.Services
             return await ObtenerMiembroAsync(tableroId, miembro.TableroMiembroId, "Miembro agregado correctamente.", cancellationToken);
         }
 
-        public async Task<ResultadoOperacion<TableroMiembroDto>> AsignarRolAsync(int tableroId, int tableroMiembroId, AsignarRolDto dto, CancellationToken cancellationToken = default)
+        public async Task<ResultadoOperacion<TableroMiembroDto>> CambiarRolAsync(int tableroId, int tableroMiembroId, AsignarRolDto dto, CancellationToken cancellationToken = default)
         {
             var miembro = await _context.TableroMiembros
                 .Include(m => m.Roles)
@@ -77,7 +77,7 @@ namespace BoardyWeb.Services
 
             if (await EsPropietarioAsync(tableroId, miembro.UsuarioId, cancellationToken))
             {
-                return ResultadoOperacion<TableroMiembroDto>.Fallo("No se pueden modificar los roles del propietario.");
+                return ResultadoOperacion<TableroMiembroDto>.Fallo("No se puede cambiar el rol del propietario. Transferí la propiedad para dejar de serlo.");
             }
 
             if (miembro.Roles.Any(r => r.RolMiembroId == dto.RolMiembroId))
@@ -91,44 +91,12 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion<TableroMiembroDto>.Fallo(nameof(dto.RolMiembroId), errorRol);
             }
 
+            // Un miembro tiene un único rol: el nuevo reemplaza al anterior en un solo SaveChanges.
+            _context.MiembrosPorRol.RemoveRange(miembro.Roles);
             miembro.Roles.Add(new MiembrosPorRol { RolMiembroId = dto.RolMiembroId, FechaAsignacion = DateTime.UtcNow });
             await _context.SaveChangesAsync(cancellationToken);
 
-            return await ObtenerMiembroAsync(tableroId, tableroMiembroId, "Rol asignado correctamente.", cancellationToken);
-        }
-
-        public async Task<ResultadoOperacion<TableroMiembroDto>> QuitarRolAsync(int tableroId, int tableroMiembroId, int rolMiembroId, CancellationToken cancellationToken = default)
-        {
-            var miembro = await _context.TableroMiembros
-                .Include(m => m.Roles)
-                .FirstOrDefaultAsync(m => m.TableroMiembroId == tableroMiembroId && m.TableroId == tableroId, cancellationToken);
-
-            if (miembro is null)
-            {
-                return ResultadoOperacion<TableroMiembroDto>.NoExiste("El miembro no existe en el tablero.");
-            }
-
-            if (await EsPropietarioAsync(tableroId, miembro.UsuarioId, cancellationToken))
-            {
-                return ResultadoOperacion<TableroMiembroDto>.Fallo("No se pueden modificar los roles del propietario.");
-            }
-
-            var asignacion = miembro.Roles.FirstOrDefault(r => r.RolMiembroId == rolMiembroId);
-
-            if (asignacion is null)
-            {
-                return ResultadoOperacion<TableroMiembroDto>.NoExiste("El miembro no tiene ese rol.");
-            }
-
-            if (miembro.Roles.Count == 1)
-            {
-                return ResultadoOperacion<TableroMiembroDto>.Fallo("El miembro debe conservar al menos un rol.");
-            }
-
-            _context.MiembrosPorRol.Remove(asignacion);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            return await ObtenerMiembroAsync(tableroId, tableroMiembroId, "Rol quitado correctamente.", cancellationToken);
+            return await ObtenerMiembroAsync(tableroId, tableroMiembroId, "Rol actualizado correctamente.", cancellationToken);
         }
 
         public async Task<ResultadoOperacion> QuitarAsync(int tableroId, int tableroMiembroId, CancellationToken cancellationToken = default)

@@ -224,7 +224,7 @@ namespace BoardyWeb.Migrations
 
                     b.HasIndex("RolMiembroId");
 
-                    b.HasIndex("TableroMiembroId", "RolMiembroId")
+                    b.HasIndex("TableroMiembroId")
                         .IsUnique();
 
                     b.ToTable("MiembrosPorRol");

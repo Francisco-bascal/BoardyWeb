@@ -65,7 +65,7 @@ namespace BoardyWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AsignarRol(int tableroId, int tableroMiembroId, AsignarRolDto dto, CancellationToken cancellationToken)
+        public async Task<IActionResult> CambiarRol(int tableroId, int tableroMiembroId, AsignarRolDto dto, CancellationToken cancellationToken)
         {
             var acceso = await ValidarAccesoAsync(tableroId, PoliticasTablero.AdministrarTablero);
             if (acceso is not null)
@@ -78,21 +78,7 @@ namespace BoardyWeb.Controllers
                 return DatosInvalidos(VolverAIndex(tableroId));
             }
 
-            var resultado = await _miembroService.AsignarRolAsync(tableroId, tableroMiembroId, dto, cancellationToken);
-            return Responder(resultado, VolverAIndex(tableroId));
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> QuitarRol(int tableroId, int tableroMiembroId, int rolMiembroId, CancellationToken cancellationToken)
-        {
-            var acceso = await ValidarAccesoAsync(tableroId, PoliticasTablero.AdministrarTablero);
-            if (acceso is not null)
-            {
-                return acceso;
-            }
-
-            var resultado = await _miembroService.QuitarRolAsync(tableroId, tableroMiembroId, rolMiembroId, cancellationToken);
+            var resultado = await _miembroService.CambiarRolAsync(tableroId, tableroMiembroId, dto, cancellationToken);
             return Responder(resultado, VolverAIndex(tableroId));
         }
 
