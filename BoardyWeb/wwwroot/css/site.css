@@ -37,6 +37,26 @@ body {
   padding: .75rem;
 }
 
-.kanban-tarjeta {
-  cursor: pointer;
+.kanban-tareas {
+  min-height: 3rem;
+}
+
+.kanban[data-puede-colaborar="true"] .kanban-tarjeta {
+  cursor: grab;
+}
+
+.kanban-columna-asa {
+  cursor: grab;
+  color: #6c757d;
+  letter-spacing: -.2em;
+  margin-right: .25rem;
+  user-select: none;
+}
+
+.sortable-ghost {
+  opacity: .4;
+}
+
+.sortable-chosen {
+  cursor: grabbing;
 }

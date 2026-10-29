@@ -60,12 +60,17 @@
     }
 
     function refrescarRegiones() {
-        $('[data-region-url]').each(function () {
+        const peticiones = $('[data-region-url]').map(function () {
             const $region = $(this);
-            $.get($region.data('region-url'))
-                .done(function (html) { $region.replaceWith(html); })
+            return $.get($region.data('region-url'))
+                .done(function (html) {
+                    $region.replaceWith(html);
+                    $(document).trigger('regionRefrescada');
+                })
                 .fail(errorAjax);
-        });
+        }).get();
+
+        return $.when.apply($, peticiones);
     }
 
     function exito(respuesta, cerrar) {
@@ -75,6 +80,13 @@
         notificar(respuesta && respuesta.mensaje, 'exito');
         refrescarRegiones();
     }
+
+    // Utilidades para otros scripts (por ejemplo kanban-dnd.js).
+    window.ajaxCrud = {
+        refrescarRegiones: refrescarRegiones,
+        errorAjax: errorAjax,
+        token: token
+    };
 
     // Abrir formulario o detalle en el modal.
     $(document).on('click', '[data-modal-url]', function (e) {

@@ -41,15 +41,15 @@
         <p class="text-muted">Este tablero todavía no tiene listas.</p>
     }
 
-    <div class="kanban">
+    <div class="kanban" data-puede-colaborar="@(Model.PuedeColaborar ? "true" : "false")" data-puede-administrar="@(Model.PuedeAdministrar ? "true" : "false")">
         @for (var i = 0; i < Model.Listas.Count; i++)
         {
             var lista = Model.Listas[i];
             var tareas = Model.Tareas.Where(t => t.ListaTareaId == lista.ListaTareaId).OrderBy(t => t.Orden).ToList();
 
-            <div class="kanban-columna">
+            <div class="kanban-columna" data-url-reordenar="@Url.Action("Reordenar", "ListasTarea", new { id = lista.ListaTareaId })">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h2 class="h6 mb-0">@lista.Nombre <span class="badge text-bg-secondary">@tareas.Count</span></h2>
+                    <h2 class="h6 mb-0">@if (Model.PuedeAdministrar) { <span class="kanban-columna-asa" title="Arrastrar para reordenar la lista">&#8942;&#8942;</span> } @lista.Nombre <span class="badge text-bg-secondary">@tareas.Count</span></h2>
                     @if (Model.PuedeAdministrar)
                     {
                         <div class="dropdown">
@@ -70,9 +70,10 @@
                     }
                 </div>
 
+                <div class="kanban-tareas" data-lista-id="@lista.ListaTareaId">
                 @foreach (var tarea in tareas)
                 {
-                    <div class="card mb-2 kanban-tarjeta">
+                    <div class="card mb-2 kanban-tarjeta" data-url-mover="@Url.Action("Mover", "Tareas", new { id = tarea.TareaId })">
                         <div class="card-body p-2">
                             <div class="d-flex justify-content-between align-items-start gap-2">
                                 <a href="#" class="fw-semibold text-decoration-none" data-modal-url="@Url.Action("Detalle", "Tareas", new { id = tarea.TareaId })">@tarea.Titulo</a>
@@ -113,6 +114,8 @@
                         </div>
                     </div>
                 }
+
+                </div>
 
                 @if (Model.PuedeAdministrar)
                 {

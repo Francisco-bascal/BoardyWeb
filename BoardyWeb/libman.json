@@ -6,6 +6,11 @@
       "library": "jquery-ajax-unobtrusive@3.2.6",
       "destination": "wwwroot/lib/jquery-ajax-unobtrusive/",
       "files": [ "jquery.unobtrusive-ajax.js", "jquery.unobtrusive-ajax.min.js" ]
+    },
+    {
+      "library": "Sortable@1.15.2",
+      "destination": "wwwroot/lib/sortablejs/",
+      "files": [ "Sortable.min.js" ]
     }
   ]
 }
