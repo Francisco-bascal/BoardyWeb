@@ -14,6 +14,8 @@ builder.Services.AddControllersWithViews(options =>
 {
     options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
     options.ModelMetadataDetailsProviders.Add(new TextoVacioProvider());
+    options.ModelMetadataDetailsProviders.Add(new MensajesValidacionEsProvider());
+    MensajesBindingEs.Aplicar(options.ModelBindingMessageProvider);
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -21,6 +23,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddDefaultIdentity<Usuario>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
+    .AddErrorDescriber<DescriptorErroresIdentity>()
     .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddAuthorization(options =>
@@ -67,6 +70,11 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRequestLocalization(new RequestLocalizationOptions()
+    .SetDefaultCulture("es-AR")
+    .AddSupportedCultures("es-AR")
+    .AddSupportedUICultures("es-AR"));
 app.UseStaticFiles();
 
 app.UseRouting();

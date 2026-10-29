@@ -11,6 +11,21 @@
       "library": "Sortable@1.15.2",
       "destination": "wwwroot/lib/sortablejs/",
       "files": [ "Sortable.min.js" ]
+    },
+    {
+      "library": "twitter-bootstrap@5.3.3",
+      "destination": "wwwroot/lib/bootstrap/dist/",
+      "files": [ "css/bootstrap.min.css", "js/bootstrap.bundle.min.js" ]
+    },
+    {
+      "library": "bootstrap-icons@1.11.3",
+      "destination": "wwwroot/lib/bootstrap-icons/",
+      "files": [ "font/bootstrap-icons.min.css", "font/fonts/bootstrap-icons.woff2", "font/fonts/bootstrap-icons.woff" ]
+    },
+    {
+      "library": "jquery-validate@1.19.5",
+      "destination": "wwwroot/lib/jquery-validation/dist/",
+      "files": [ "localization/messages_es.min.js" ]
     }
   ]
 }

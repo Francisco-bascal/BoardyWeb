@@ -1,8 +1,74 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio";
+    var autenticado = User.Identity?.IsAuthenticated == true;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+            <span class="chip mb-3"><i class="bi bi-lightning-charge-fill"></i> Hecho para equipos de desarrollo</span>
+            <h1>Tus tareas, en un <span>tablero</span> que se mueve a tu ritmo.</h1>
+            <p class="lead mt-3">Organizá el trabajo del equipo en listas, arrastrá tarjetas y mantené a todos en sintonía.</p>
+            <div class="d-flex flex-wrap gap-2 mt-4">
+                @if (autenticado)
+                {
+                    <a class="btn btn-primary btn-lg" asp-controller="Tableros" asp-action="Index">Ir a mis tableros <i class="bi bi-arrow-right ms-1"></i></a>
+                }
+                else
+                {
+                    <a class="btn btn-primary btn-lg" asp-area="Identity" asp-page="/Account/Register">Crear cuenta gratis</a>
+                    <a class="btn btn-outline-secondary btn-lg" asp-area="Identity" asp-page="/Account/Login">Ingresar</a>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-6" aria-hidden="true">
+            <div class="maqueta">
+                <div class="maqueta-columna">
+                    <div class="maqueta-titulo">Pendiente</div>
+                    <div class="maqueta-tarjeta prioridad-alta">Definir API<div class="barra"></div></div>
+                    <div class="maqueta-tarjeta prioridad-baja">Actualizar docs<div class="barra"></div></div>
+                </div>
+                <div class="maqueta-columna">
+                    <div class="maqueta-titulo">En progreso</div>
+                    <div class="maqueta-tarjeta prioridad-urgente">Corregir bug #214<div class="barra"></div></div>
+                    <div class="maqueta-tarjeta prioridad-media">Refactor auth<div class="barra"></div></div>
+                </div>
+                <div class="maqueta-columna">
+                    <div class="maqueta-titulo">Finalizada</div>
+                    <div class="maqueta-tarjeta prioridad-media">Configurar CI<div class="barra"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="row g-4 mt-2">
+    <div class="col-md-4">
+        <div class="caracteristica">
+            <span class="icono"><i class="bi bi-kanban"></i></span>
+            <div>
+                <h2 class="h6 mb-1">Tableros kanban</h2>
+                <p class="text-suave mb-0 small">Listas y tarjetas con arrastrar y soltar.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="caracteristica">
+            <span class="icono"><i class="bi bi-shield-check"></i></span>
+            <div>
+                <h2 class="h6 mb-1">Roles por tablero</h2>
+                <p class="text-suave mb-0 small">Cada miembro ve y hace lo que le corresponde.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="caracteristica">
+            <span class="icono"><i class="bi bi-people"></i></span>
+            <div>
+                <h2 class="h6 mb-1">Trabajo en equipo</h2>
+                <p class="text-suave mb-0 small">Invitá a tu equipo, asigná tareas y comentá.</p>
+            </div>
+        </div>
+    </div>
+</section>

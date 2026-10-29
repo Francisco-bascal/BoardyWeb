@@ -1,0 +1,16 @@
+@page
+@model LockoutModel
+@{
+    ViewData["Title"] = "Cuenta bloqueada";
+}
+
+<div class="auth-shell auth-shell-simple">
+    <div class="auth-form">
+        <div class="estado-vacio border-0 p-0">
+            <i class="bi bi-lock"></i>
+            <h1 class="h4 mb-0">Cuenta bloqueada</h1>
+            <p class="mb-0">Se bloqueó la cuenta por varios intentos fallidos. Probá de nuevo en unos minutos.</p>
+            <a class="btn btn-primary mt-2" asp-page="./ForgotPassword">Recuperar contraseña</a>
+        </div>
+    </div>
+</div>

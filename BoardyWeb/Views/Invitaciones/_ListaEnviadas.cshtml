@@ -3,31 +3,37 @@
 <div id="region-invitaciones-enviadas" data-region-url="@Url.Action("DelTablero", "Invitaciones", new { tableroId = ViewData["TableroId"] })">
     @if (!Model.Any())
     {
-        <p class="text-muted">Todavía no enviaste invitaciones desde este tablero.</p>
+        <div class="estado-vacio">
+            <i class="bi bi-send"></i>
+            <strong>Todavía no enviaste invitaciones</strong>
+            <span>Invitá a tu equipo por correo electrónico.</span>
+        </div>
     }
     else
     {
-        <table class="table align-middle">
-            <thead>
-                <tr><th>Invitado</th><th>Estado</th><th>Fecha</th><th></th></tr>
-            </thead>
-            <tbody>
-                @foreach (var invitacion in Model)
-                {
-                    <tr>
-                        <td>@invitacion.UsuarioInvitadoNombre</td>
-                        <td>@invitacion.Estado</td>
-                        <td>@invitacion.FechaInvitacion.ToString("dd/MM/yyyy")</td>
-                        <td class="text-end">
-                            @if (invitacion.Estado == EstadoInvitacion.Pendiente)
-                            {
-                                <button type="button" class="btn btn-sm btn-outline-danger" data-accion-url="@Url.Action("Cancelar", "Invitaciones", new { id = invitacion.InvitacionTableroId })"
-                                        data-confirmar="¿Cancelar la invitación?">Cancelar</button>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="tabla-contenedor">
+            <table class="table align-middle">
+                <thead>
+                    <tr><th>Invitado</th><th>Estado</th><th>Fecha</th><th></th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var invitacion in Model)
+                    {
+                        <tr>
+                            <td>@invitacion.UsuarioInvitadoNombre</td>
+                            <td><span class="chip">@invitacion.Estado</span></td>
+                            <td class="text-suave">@invitacion.FechaInvitacion.ToString("dd/MM/yyyy")</td>
+                            <td class="text-end">
+                                @if (invitacion.Estado == EstadoInvitacion.Pendiente)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-accion-url="@Url.Action("Cancelar", "Invitaciones", new { id = invitacion.InvitacionTableroId })"
+                                            data-confirmar="¿Cancelar la invitación?">Cancelar</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 </div>

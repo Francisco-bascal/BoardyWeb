@@ -6,32 +6,38 @@
 <div id="region-etiquetas" data-region-url="@Url.Action("Index", "Etiquetas", new { tableroId = ViewData["TableroId"] })">
     @if (!Model.Any())
     {
-        <p class="text-muted">Este tablero todavía no tiene etiquetas.</p>
+        <div class="estado-vacio">
+            <i class="bi bi-tags"></i>
+            <strong>Este tablero todavía no tiene etiquetas</strong>
+            <span>Las etiquetas ayudan a clasificar tareas (bug, mejora, urgente...).</span>
+        </div>
     }
     else
     {
-        <table class="table align-middle">
-            <thead>
-                <tr><th>Etiqueta</th><th>Descripción</th><th class="text-end">Tareas</th><th></th></tr>
-            </thead>
-            <tbody>
-                @foreach (var etiqueta in Model)
-                {
-                    <tr>
-                        <td><span class="badge" style="background-color: @etiqueta.Color">@etiqueta.Nombre</span></td>
-                        <td>@etiqueta.Descripcion</td>
-                        <td class="text-end">@etiqueta.CantidadTareas</td>
-                        <td class="text-end">
-                            @if (puedeAdministrar)
-                            {
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-modal-url="@Url.Action("Editar", "Etiquetas", new { id = etiqueta.EtiquetaId })">Editar</button>
-                                <button type="button" class="btn btn-sm btn-outline-danger" data-accion-url="@Url.Action("Eliminar", "Etiquetas", new { id = etiqueta.EtiquetaId })"
-                                        data-confirmar="¿Eliminar la etiqueta @etiqueta.Nombre?">Eliminar</button>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="tabla-contenedor">
+            <table class="table align-middle">
+                <thead>
+                    <tr><th>Etiqueta</th><th>Descripción</th><th class="text-end">Tareas</th><th></th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var etiqueta in Model)
+                    {
+                        <tr>
+                            <td><span class="etiqueta-pill" style="background-color: @etiqueta.Color">@etiqueta.Nombre</span></td>
+                            <td class="text-suave">@etiqueta.Descripcion</td>
+                            <td class="text-end mono">@etiqueta.CantidadTareas</td>
+                            <td class="text-end text-nowrap">
+                                @if (puedeAdministrar)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-modal-url="@Url.Action("Editar", "Etiquetas", new { id = etiqueta.EtiquetaId })"><i class="bi bi-pencil"></i><span class="visually-hidden">Editar</span></button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-accion-url="@Url.Action("Eliminar", "Etiquetas", new { id = etiqueta.EtiquetaId })"
+                                            data-confirmar="¿Eliminar la etiqueta @etiqueta.Nombre?"><i class="bi bi-trash"></i><span class="visually-hidden">Eliminar</span></button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 </div>

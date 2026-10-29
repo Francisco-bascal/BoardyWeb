@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 
 namespace BoardyWeb.Comun
@@ -12,7 +13,9 @@ namespace BoardyWeb.Comun
     {
         public void CreateDisplayMetadata(DisplayMetadataProviderContext context)
         {
-            if (context.Key.ModelType == typeof(string))
+            // Los campos con DataType (teléfono, correo, URL, contraseña) conservan la conversión a null
+            // para que un valor vacío no dispare su validación de formato.
+            if (context.Key.ModelType == typeof(string) && !context.Attributes.OfType<DataTypeAttribute>().Any())
             {
                 context.DisplayMetadata.ConvertEmptyStringToNull = false;
             }

@@ -1,0 +1,24 @@
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<div class="pagina-encabezado">
+    <h1>Mi cuenta</h1>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-3">
+        <partial name="_ManageNav" />
+    </div>
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-body p-4">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+}

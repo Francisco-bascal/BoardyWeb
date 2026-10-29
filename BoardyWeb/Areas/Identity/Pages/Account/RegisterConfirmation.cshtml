@@ -1,24 +1,23 @@
 @page
 @model RegisterConfirmationModel
 @{
-    ViewData["Title"] = "Confirmación de registro";
+    ViewData["Title"] = "Confirmá tu cuenta";
 }
 
-<h1>@ViewData["Title"]</h1>
-
-@if (Model.DisplayConfirmAccountLink)
-{
-    <p>
-        Esta aplicación todavía no tiene configurado un emisor de correo real.
-        Por ahora podés confirmar tu cuenta con el siguiente enlace:
-    </p>
-    <p>
-        <a id="confirm-link" href="@Model.EmailConfirmationUrl">Confirmar cuenta</a>
-    </p>
-}
-else
-{
-    <p>
-        Revisá tu correo electrónico para confirmar tu cuenta.
-    </p>
-}
+<div class="auth-shell auth-shell-simple">
+    <div class="auth-form">
+        <div class="estado-vacio border-0 p-0">
+            <i class="bi bi-envelope-paper"></i>
+            <h1 class="h4 mb-0">Confirmá tu cuenta</h1>
+            @if (Model.DisplayConfirmAccountLink)
+            {
+                <p class="mb-0">Todavía no hay un servicio de correo configurado. Por ahora podés confirmar tu cuenta con este enlace:</p>
+                <a id="confirm-link" class="btn btn-primary mt-2" href="@Model.EmailConfirmationUrl">Confirmar cuenta</a>
+            }
+            else
+            {
+                <p class="mb-0">Te enviamos un correo con un enlace para confirmar tu cuenta. Revisá tu bandeja de entrada.</p>
+            }
+        </div>
+    </div>
+</div>

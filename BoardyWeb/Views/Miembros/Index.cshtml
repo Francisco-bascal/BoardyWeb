@@ -5,25 +5,31 @@
     var roles = ViewData["Roles"] as SelectList;
 }
 
-<div class="mb-3">
-    <a asp-controller="Tableros" asp-action="Detalle" asp-route-id="@tableroId">&larr; Volver al tablero</a>
-    <h1 class="h3 mb-0">Miembros del tablero</h1>
+<div class="pagina-encabezado">
+    <div>
+        <a asp-controller="Tableros" asp-action="Detalle" asp-route-id="@tableroId" class="small"><i class="bi bi-arrow-left me-1"></i>Volver al tablero</a>
+        <h1>Miembros del tablero</h1>
+    </div>
 </div>
 
 @if (ViewData["PuedeAdministrar"] is true)
 {
-    <form asp-action="Agregar" asp-route-tableroId="@tableroId" method="post" class="row g-2 mb-4"
-          data-ajax="true" data-ajax-method="post" data-ajax-success="ajaxFormExito" data-ajax-failure="ajaxFormFallo">
-        <div class="col-md-5">
-            <input name="Email" type="email" class="form-control" placeholder="Email del usuario" required />
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Agregar" asp-route-tableroId="@tableroId" method="post" class="row g-2 align-items-center"
+                  data-ajax="true" data-ajax-method="post" data-ajax-success="ajaxFormExito" data-ajax-failure="ajaxFormFallo">
+                <div class="col-md-5">
+                    <input name="Email" type="email" class="form-control" placeholder="Correo del usuario a agregar" required />
+                </div>
+                <div class="col-md-4">
+                    <select name="RolMiembroId" class="form-select" asp-items="roles"></select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-person-plus me-1"></i>Agregar miembro</button>
+                </div>
+            </form>
         </div>
-        <div class="col-md-4">
-            <select name="RolMiembroId" class="form-select" asp-items="roles"></select>
-        </div>
-        <div class="col-md-3">
-            <button type="submit" class="btn btn-primary w-100">Agregar miembro</button>
-        </div>
-    </form>
+    </div>
 }
 
 <partial name="_Lista" model="Model" />

@@ -1,24 +1,26 @@
 @model IReadOnlyList<EstadoTareaDto>
 
 <div id="region-estados" data-region-url="@Url.Action("Index", "EstadosTarea")">
-    <table class="table align-middle">
-        <thead>
-            <tr><th>Nombre</th><th>Descripción</th><th class="text-end">Tareas</th><th></th></tr>
-        </thead>
-        <tbody>
-            @foreach (var estado in Model)
-            {
-                <tr>
-                    <td>@estado.Nombre</td>
-                    <td>@estado.Descripcion</td>
-                    <td class="text-end">@estado.CantidadTareas</td>
-                    <td class="text-end">
-                        <button type="button" class="btn btn-sm btn-outline-primary" data-modal-url="@Url.Action("Editar", "EstadosTarea", new { id = estado.EstadoTareaId })">Editar</button>
-                        <button type="button" class="btn btn-sm btn-outline-danger" data-accion-url="@Url.Action("Eliminar", "EstadosTarea", new { id = estado.EstadoTareaId })"
-                                data-confirmar="¿Eliminar el estado @estado.Nombre?">Eliminar</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="tabla-contenedor">
+        <table class="table align-middle">
+            <thead>
+                <tr><th>Nombre</th><th>Descripción</th><th class="text-end">Tareas</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var estado in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@estado.Nombre</td>
+                        <td class="text-suave">@estado.Descripcion</td>
+                        <td class="text-end mono">@estado.CantidadTareas</td>
+                        <td class="text-end text-nowrap">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-modal-url="@Url.Action("Editar", "EstadosTarea", new { id = estado.EstadoTareaId })"><i class="bi bi-pencil"></i><span class="visually-hidden">Editar</span></button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-accion-url="@Url.Action("Eliminar", "EstadosTarea", new { id = estado.EstadoTareaId })"
+                                    data-confirmar="¿Eliminar el estado @estado.Nombre?"><i class="bi bi-trash"></i><span class="visually-hidden">Eliminar</span></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
