@@ -1,0 +1,202 @@
+using BoardyWeb.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace BoardyWeb.Data
+{
+    public static class DbSeeder
+    {
+        private const string EmailAdministrador = "admin@boardy.local";
+        private const string PasswordAdministrador = "Admin123$";
+
+        public static async Task SeedAsync(IServiceProvider services)
+        {
+            using var scope = services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            await context.Database.MigrateAsync();
+
+            await SeedRolesIdentityAsync(scope.ServiceProvider);
+            await SeedEstadosTareaAsync(context);
+            await SeedEtiquetasAsync(context);
+            await SeedRolesMiembroAsync(context);
+            var administrador = await SeedAdministradorAsync(scope.ServiceProvider);
+            await SeedTableroDemoAsync(context, administrador);
+        }
+
+        private static async Task SeedRolesIdentityAsync(IServiceProvider services)
+        {
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+            foreach (var nombre in new[] { "Administrador", "Operador" })
+            {
+                if (!await roleManager.RoleExistsAsync(nombre))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(nombre));
+                }
+            }
+        }
+
+        private static async Task SeedEstadosTareaAsync(AppDbContext context)
+        {
+            if (await context.EstadoTareas.AnyAsync())
+            {
+                return;
+            }
+
+            context.EstadoTareas.AddRange(
+                new EstadoTarea { Nombre = "Pendiente", Descripcion = "La tarea todavía no comenzó." },
+                new EstadoTarea { Nombre = "En progreso", Descripcion = "La tarea está siendo trabajada." },
+                new EstadoTarea { Nombre = "En revisión", Descripcion = "La tarea espera revisión." },
+                new EstadoTarea { Nombre = "Finalizada", Descripcion = "La tarea fue completada." });
+
+            await context.SaveChangesAsync();
+        }
+
+        private static async Task SeedEtiquetasAsync(AppDbContext context)
+        {
+            if (await context.Etiquetas.AnyAsync())
+            {
+                return;
+            }
+
+            context.Etiquetas.AddRange(
+                new Etiqueta { Nombre = "Bug", Descripcion = "Error a corregir.", Color = "#DC3545" },
+                new Etiqueta { Nombre = "Mejora", Descripcion = "Mejora funcional.", Color = "#0D6EFD" },
+                new Etiqueta { Nombre = "Urgente", Descripcion = "Requiere atención inmediata.", Color = "#FD7E14" },
+                new Etiqueta { Nombre = "Documentación", Descripcion = "Trabajo de documentación.", Color = "#6C757D" });
+
+            await context.SaveChangesAsync();
+        }
+
+        private static async Task SeedRolesMiembroAsync(AppDbContext context)
+        {
+            if (await context.RolMiembros.AnyAsync())
+            {
+                return;
+            }
+
+            context.RolMiembros.AddRange(
+                new RolMiembro { Nombre = "Propietario", Descripcion = "Dueño del tablero." },
+                new RolMiembro { Nombre = "Administrador", Descripcion = "Crea y administra tareas del tablero." },
+                new RolMiembro { Nombre = "Operario", Descripcion = "Marca tareas como finalizadas, agrega etiquetas y comentarios." },
+                new RolMiembro { Nombre = "Lector", Descripcion = "Solo consulta el tablero." });
+
+            await context.SaveChangesAsync();
+        }
+
+        private static async Task<Usuario> SeedAdministradorAsync(IServiceProvider services)
+        {
+            var userManager = services.GetRequiredService<UserManager<Usuario>>();
+            var administrador = await userManager.FindByEmailAsync(EmailAdministrador);
+
+            if (administrador is null)
+            {
+                administrador = new Usuario
+                {
+                    UserName = EmailAdministrador,
+                    Email = EmailAdministrador,
+                    EmailConfirmed = true,
+                    Nombre = "Administrador",
+                    Apellido = "Boardy",
+                    FechaRegistro = DateTime.UtcNow,
+                    Estado = true
+                };
+
+                var resultado = await userManager.CreateAsync(administrador, PasswordAdministrador);
+                if (!resultado.Succeeded)
+                {
+                    throw new InvalidOperationException(
+                        $"No se pudo crear el usuario administrador: {string.Join(" ", resultado.Errors.Select(e => e.Description))}");
+                }
+            }
+
+            if (!await userManager.IsInRoleAsync(administrador, "Administrador"))
+            {
+                await userManager.AddToRoleAsync(administrador, "Administrador");
+            }
+
+            return administrador;
+        }
+
+        private static async Task SeedTableroDemoAsync(AppDbContext context, Usuario administrador)
+        {
+            if (await context.Tableros.AnyAsync())
+            {
+                return;
+            }
+
+            var estados = await context.EstadoTareas.OrderBy(e => e.EstadoTareaId).ToListAsync();
+            var rolPropietario = await context.RolMiembros.FirstAsync(r => r.Nombre == "Propietario");
+
+            var tablero = new Tablero
+            {
+                Nombre = "Tablero de ejemplo",
+                Descripcion = "Tablero de demostración con listas y tareas de muestra.",
+                PropietarioId = administrador.Id
+            };
+
+            tablero.Miembros.Add(new TableroMiembro
+            {
+                UsuarioId = administrador.Id,
+                FechaAsignacion = DateTime.UtcNow,
+                Roles = new List<MiembrosPorRol>
+                {
+                    new MiembrosPorRol
+                    {
+                        RolMiembroId = rolPropietario.RolMiembroId,
+                        FechaAsignacion = DateTime.UtcNow
+                    }
+                }
+            });
+
+            var listaPendiente = new ListaTarea { Nombre = "Pendiente", Orden = 1 };
+            var listaEnProgreso = new ListaTarea { Nombre = "En progreso", Orden = 2 };
+            var listaFinalizada = new ListaTarea { Nombre = "Finalizada", Orden = 3 };
+
+            listaPendiente.Tareas.Add(new Tarea
+            {
+                Titulo = "Definir el alcance del tablero",
+                Descripcion = "Acordar con el equipo las columnas y el flujo de trabajo.",
+                Prioridad = "Alta",
+                Orden = 1,
+                EstadoTareaId = estados[0].EstadoTareaId
+            });
+
+            listaPendiente.Tareas.Add(new Tarea
+            {
+                Titulo = "Cargar las etiquetas del proyecto",
+                Descripcion = "Revisar el catálogo de etiquetas disponibles.",
+                Prioridad = "Media",
+                Orden = 2,
+                EstadoTareaId = estados[0].EstadoTareaId
+            });
+
+            listaEnProgreso.Tareas.Add(new Tarea
+            {
+                Titulo = "Implementar el tablero kanban",
+                Descripcion = "Mostrar listas y tarjetas con su estado actual.",
+                Prioridad = "Alta",
+                Orden = 1,
+                FechaVencimiento = DateTime.UtcNow.AddDays(7),
+                EstadoTareaId = estados[1].EstadoTareaId
+            });
+
+            listaFinalizada.Tareas.Add(new Tarea
+            {
+                Titulo = "Configurar Identity",
+                Descripcion = "Registro, inicio de sesión y roles de usuario.",
+                Prioridad = "Alta",
+                Orden = 1,
+                EstadoTareaId = estados[3].EstadoTareaId
+            });
+
+            tablero.ListasTarea.Add(listaPendiente);
+            tablero.ListasTarea.Add(listaEnProgreso);
+            tablero.ListasTarea.Add(listaFinalizada);
+
+            context.Tableros.Add(tablero);
+            await context.SaveChangesAsync();
+        }
+    }
+}

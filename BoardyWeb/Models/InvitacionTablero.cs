@@ -10,11 +10,11 @@ namespace BoardyWeb.Models
 
         public string Estado { get; set; } = string.Empty;
 
-        public int UsuarioInvitadoId { get; set; }
+        public string UsuarioInvitadoId { get; set; } = null!;
 
         public Usuario UsuarioInvitado { get; set; } = null!;
 
-        public int UsuarioInvitadorId { get; set; }
+        public string UsuarioInvitadorId { get; set; } = null!;
 
         public Usuario UsuarioInvitador { get; set; } = null!;
 

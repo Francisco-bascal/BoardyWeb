@@ -1,16 +1,22 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
+
 namespace BoardyWeb.Models
 {
-    public class Tablero
+    public class Tablero : AuditableEntity
     {
         public int TableroId { get; set; }
 
+        [Required(ErrorMessage = "El nombre es obligatorio")]
+        [Display(Name = "Nombre")]
+        [StringLength(150, ErrorMessage = "El {0} no puede superar los {1} caracteres.")]
         public string Nombre { get; set; } = string.Empty;
 
+        [Display(Name = "Descripción")]
+        [StringLength(1000, ErrorMessage = "El {0} no puede superar los {1} caracteres.")]
         public string Descripcion { get; set; } = string.Empty;
 
-        public DateTime FechaCreacion { get; set; }
-
-        public int PropietarioId { get; set; }
+        public string PropietarioId { get; set; } = null!;
 
         public Usuario Propietario { get; set; } = null!;
 

@@ -1,24 +1,25 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
 namespace BoardyWeb.Models
 {
     public class Usuario : IdentityUser
     {
-        public int UsuarioId { get; set; }
+        [Required(ErrorMessage = "El nombre es obligatorio")]
+        [Display(Name = "Nombre")]
+        [StringLength(50, ErrorMessage = "El {0} no puede superar los {1} caracteres.")]
+        public string Nombre { get; set; } = null!;
 
-        public string Nombre { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El apellido es obligatorio")]
+        [Display(Name = "Apellido")]
+        [StringLength(50, ErrorMessage = "El {0} no puede superar los {1} caracteres.")]
+        public string Apellido { get; set; } = null!;
 
-        public string Apellido { get; set; } = string.Empty;
-
-        public string Email { get; set; } = string.Empty;
-
-        public string PasswordHash { get; set; } = string.Empty;
-
+        [Display(Name = "Fecha de registro")]
         public DateTime FechaRegistro { get; set; }
 
-        public string Rol { get; set; } = string.Empty;
-
-        public bool Estado { get; set; }
+        [Display(Name = "Estado")]
+        public bool Estado { get; set; } = true;
 
         public ICollection<Tablero> TablerosPropios { get; set; } = new List<Tablero>();
 

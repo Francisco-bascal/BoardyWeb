@@ -6,7 +6,7 @@ namespace BoardyWeb.Models
 
         public DateTime FechaAsignacion { get; set; }
 
-        public int UsuarioId { get; set; }
+        public string UsuarioId { get; set; } = null!;
 
         public Usuario Usuario { get; set; } = null!;
 
