@@ -1,0 +1,18 @@
+@model IReadOnlyList<EtiquetaDto>
+@{
+    ViewData["Title"] = "Etiquetas";
+    var tableroId = ViewData["TableroId"];
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <a asp-controller="Tableros" asp-action="Detalle" asp-route-id="@tableroId">&larr; Volver al tablero</a>
+        <h1 class="h3 mb-0">Etiquetas</h1>
+    </div>
+    @if (ViewData["PuedeAdministrar"] is true)
+    {
+        <button type="button" class="btn btn-primary" data-modal-url="@Url.Action("Crear", "Etiquetas", new { tableroId })">Nueva etiqueta</button>
+    }
+</div>
+
+<partial name="_Lista" model="Model" />

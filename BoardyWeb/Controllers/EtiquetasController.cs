@@ -25,7 +25,8 @@ namespace BoardyWeb.Controllers
             }
 
             ViewData["TableroId"] = tableroId;
-            return View(await _etiquetaService.ListarAsync(tableroId, cancellationToken));
+            ViewData["PuedeAdministrar"] = await TienePermisoAsync(tableroId, PoliticasTablero.AdministrarTablero);
+            return Vista("_Lista", await _etiquetaService.ListarAsync(tableroId, cancellationToken));
         }
 
         public async Task<IActionResult> Crear(int tableroId)
@@ -37,7 +38,7 @@ namespace BoardyWeb.Controllers
             }
 
             ViewData["TableroId"] = tableroId;
-            return View(new CrearEtiquetaDto());
+            return VistaFormulario(new CrearEtiquetaDto());
         }
 
         [HttpPost]
@@ -54,7 +55,7 @@ namespace BoardyWeb.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
             var resultado = await _etiquetaService.CrearAsync(tableroId, dto, cancellationToken);
@@ -67,11 +68,10 @@ namespace BoardyWeb.Controllers
             if (!resultado.Exito)
             {
                 AgregarErrores(resultado);
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
-            Notificar(resultado);
-            return RedirectToAction(nameof(Index), new { tableroId });
+            return Responder(resultado, RedirectToAction(nameof(Index), new { tableroId }));
         }
 
         public async Task<IActionResult> Editar(int id, CancellationToken cancellationToken)
@@ -88,7 +88,7 @@ namespace BoardyWeb.Controllers
 
             ViewData["EtiquetaId"] = id;
             ViewData["TableroId"] = tableroId;
-            return View(new ActualizarEtiquetaDto
+            return VistaFormulario(new ActualizarEtiquetaDto
             {
                 Nombre = etiqueta.Nombre,
                 Descripcion = etiqueta.Descripcion,
@@ -112,7 +112,7 @@ namespace BoardyWeb.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
             var resultado = await _etiquetaService.ActualizarAsync(id, dto, cancellationToken);
@@ -125,11 +125,10 @@ namespace BoardyWeb.Controllers
             if (!resultado.Exito)
             {
                 AgregarErrores(resultado);
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
-            Notificar(resultado);
-            return RedirectToAction(nameof(Index), new { tableroId });
+            return Responder(resultado, RedirectToAction(nameof(Index), new { tableroId }));
         }
 
         [HttpPost]

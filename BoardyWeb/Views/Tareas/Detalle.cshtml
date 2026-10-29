@@ -1,0 +1,12 @@
+@model TareaDetalleViewModel
+@{
+    ViewData["Title"] = Model.Tarea.Titulo;
+}
+
+<div class="mb-3">
+    <a asp-controller="Tableros" asp-action="Detalle" asp-route-id="@Model.Tarea.TableroId">&larr; Volver al tablero @Model.Tarea.TableroNombre</a>
+</div>
+
+<div class="modal-content mx-auto" style="max-width: 48rem;">
+    <partial name="_Detalle" model="Model" />
+</div>

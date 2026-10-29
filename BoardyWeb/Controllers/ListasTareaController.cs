@@ -25,7 +25,7 @@ namespace BoardyWeb.Controllers
             }
 
             ViewData["TableroId"] = tableroId;
-            return View(new CrearListaTareaDto());
+            return VistaFormulario(new CrearListaTareaDto());
         }
 
         [HttpPost]
@@ -42,7 +42,7 @@ namespace BoardyWeb.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
             var resultado = await _listaTareaService.CrearAsync(tableroId, dto, cancellationToken);
@@ -55,11 +55,10 @@ namespace BoardyWeb.Controllers
             if (!resultado.Exito)
             {
                 AgregarErrores(resultado);
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
-            Notificar(resultado);
-            return IrATablero(tableroId);
+            return Responder(resultado, IrATablero(tableroId));
         }
 
         public async Task<IActionResult> Editar(int id, CancellationToken cancellationToken)
@@ -76,7 +75,7 @@ namespace BoardyWeb.Controllers
 
             ViewData["ListaTareaId"] = id;
             ViewData["TableroId"] = tableroId;
-            return View(new ActualizarListaTareaDto { Nombre = lista.Nombre, Descripcion = lista.Descripcion });
+            return VistaFormulario(new ActualizarListaTareaDto { Nombre = lista.Nombre, Descripcion = lista.Descripcion });
         }
 
         [HttpPost]
@@ -95,7 +94,7 @@ namespace BoardyWeb.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
             var resultado = await _listaTareaService.ActualizarAsync(id, dto, cancellationToken);
@@ -108,11 +107,10 @@ namespace BoardyWeb.Controllers
             if (!resultado.Exito)
             {
                 AgregarErrores(resultado);
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
-            Notificar(resultado);
-            return IrATablero(tableroId!.Value);
+            return Responder(resultado, IrATablero(tableroId!.Value));
         }
 
         [HttpPost]

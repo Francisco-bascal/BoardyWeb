@@ -1,0 +1,27 @@
+@model IReadOnlyList<TableroDto>
+
+<div id="region-tableros" data-region-url="@Url.Action("Index", "Tableros")">
+    @if (!Model.Any())
+    {
+        <p class="text-muted">Todavía no pertenecés a ningún tablero. Creá el primero con el botón "Nuevo tablero".</p>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-3">
+            @foreach (var tablero in Model)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a asp-controller="Tableros" asp-action="Detalle" asp-route-id="@tablero.TableroId" class="text-decoration-none">@tablero.Nombre</a>
+                            </h5>
+                            <p class="card-text text-muted">@tablero.Descripcion</p>
+                        </div>
+                        <div class="card-footer text-muted small">Creado el @tablero.FechaCreacion.ToString("dd/MM/yyyy")</div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

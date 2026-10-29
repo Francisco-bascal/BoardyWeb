@@ -15,6 +15,7 @@ namespace BoardyWeb.Controllers
         private readonly IEstadoTareaService _estadoTareaService;
         private readonly IComentarioService _comentarioService;
         private readonly IEtiquetaService _etiquetaService;
+        private readonly IMiembroTableroService _miembroService;
 
         public TareasController(
             ITareaService tareaService,
@@ -22,8 +23,10 @@ namespace BoardyWeb.Controllers
             IEstadoTareaService estadoTareaService,
             IComentarioService comentarioService,
             IEtiquetaService etiquetaService,
+            IMiembroTableroService miembroService,
             IAuthorizationService autorizacion) : base(autorizacion)
         {
+            _miembroService = miembroService;
             _tareaService = tareaService;
             _listaTareaService = listaTareaService;
             _estadoTareaService = estadoTareaService;
@@ -50,11 +53,14 @@ namespace BoardyWeb.Controllers
             {
                 Tarea = tarea.Datos!,
                 Comentarios = await _comentarioService.ListarPorTareaAsync(id, cancellationToken),
+                Estados = await _estadoTareaService.ListarAsync(cancellationToken),
+                EtiquetasDelTablero = await _etiquetaService.ListarAsync(tableroId, cancellationToken),
+                MiembrosDelTablero = await _miembroService.ListarAsync(tableroId, cancellationToken),
                 PuedeColaborar = await TienePermisoAsync(tableroId, PoliticasTablero.ColaborarEnTablero),
                 PuedeAdministrar = await TienePermisoAsync(tableroId, PoliticasTablero.AdministrarTablero)
             };
 
-            return View(modelo);
+            return Vista("_Detalle", modelo);
         }
 
         public async Task<IActionResult> Crear(int listaTareaId, CancellationToken cancellationToken)
@@ -68,7 +74,7 @@ namespace BoardyWeb.Controllers
 
             await CargarSelectoresAsync(cancellationToken);
             ViewData["ListaTareaId"] = listaTareaId;
-            return View(new CrearTareaDto());
+            return VistaFormulario(new CrearTareaDto());
         }
 
         [HttpPost]
@@ -100,8 +106,7 @@ namespace BoardyWeb.Controllers
                 return await VolverAFormularioCrearAsync(listaTareaId, dto, cancellationToken);
             }
 
-            Notificar(resultado);
-            return IrATablero(tableroId!.Value);
+            return Responder(resultado, IrATablero(tableroId!.Value));
         }
 
         public async Task<IActionResult> Editar(int id, CancellationToken cancellationToken)
@@ -122,7 +127,7 @@ namespace BoardyWeb.Controllers
             await CargarSelectoresAsync(cancellationToken);
             ViewData["TareaId"] = id;
 
-            return View(new ActualizarTareaDto
+            return VistaFormulario(new ActualizarTareaDto
             {
                 Titulo = tarea.Datos!.Titulo,
                 Descripcion = tarea.Datos.Descripcion,
@@ -160,8 +165,7 @@ namespace BoardyWeb.Controllers
                 return await VolverAFormularioEditarAsync(id, dto, cancellationToken);
             }
 
-            Notificar(resultado);
-            return IrATarea(id);
+            return Responder(resultado, IrATarea(id));
         }
 
         [HttpPost]
@@ -289,14 +293,14 @@ namespace BoardyWeb.Controllers
         {
             await CargarSelectoresAsync(cancellationToken);
             ViewData["ListaTareaId"] = listaTareaId;
-            return View(dto);
+            return VistaFormulario(dto);
         }
 
         private async Task<IActionResult> VolverAFormularioEditarAsync(int tareaId, ActualizarTareaDto dto, CancellationToken cancellationToken)
         {
             await CargarSelectoresAsync(cancellationToken);
             ViewData["TareaId"] = tareaId;
-            return View(dto);
+            return VistaFormulario(dto);
         }
     }
 }

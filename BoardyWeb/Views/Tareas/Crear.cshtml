@@ -1,0 +1,12 @@
+@model CrearTareaDto
+@{
+    ViewData["Title"] = "Nueva tarea";
+}
+
+<div class="modal-content mx-auto" style="max-width: 48rem;">
+    <partial name="_Formulario" model="Model" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -14,6 +14,16 @@ namespace BoardyWeb.Controllers
     {
         protected string UsuarioId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
+        /// <summary>Indica si la petición fue realizada por jQuery/AJAX (cabecera X-Requested-With).</summary>
+        protected bool EsAjax => Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+
+        /// <summary>Vista completa en una navegación normal; parcial en una petición AJAX.</summary>
+        protected IActionResult Vista(string parcial, object modelo) =>
+            EsAjax ? PartialView(parcial, modelo) : View(modelo);
+
+        /// <summary>Formulario de alta/edición: parcial "_Formulario" para el modal, vista completa si no es AJAX.</summary>
+        protected IActionResult VistaFormulario(object modelo) => Vista("_Formulario", modelo);
+
         /// <summary>Devuelve 404 o 403 si el resultado lo indica; null en cualquier otro caso.</summary>
         protected IActionResult? ResultadoNoValido(ResultadoOperacion resultado)
         {
@@ -45,7 +55,10 @@ namespace BoardyWeb.Controllers
             TempData[resultado.Exito ? "Exito" : "Error"] = resultado.Mensaje ?? string.Join(" ", resultado.Errores.Values);
         }
 
-        /// <summary>Para acciones que solo redirigen: traduce 404/403, notifica y redirige a <paramref name="destino"/>.</summary>
+        /// <summary>
+        /// Cierra una acción POST: traduce 404/403 y, según el tipo de petición, devuelve JSON
+        /// (AJAX) o notifica por TempData y redirige a <paramref name="destino"/>.
+        /// </summary>
         protected IActionResult Responder(ResultadoOperacion resultado, IActionResult destino)
         {
             var noValido = ResultadoNoValido(resultado);
@@ -54,13 +67,26 @@ namespace BoardyWeb.Controllers
                 return noValido;
             }
 
+            if (EsAjax)
+            {
+                var respuesta = RespuestaAjax.Desde(resultado);
+                return resultado.Exito ? Json(respuesta) : BadRequest(respuesta);
+            }
+
             Notificar(resultado);
             return destino;
         }
 
         protected IActionResult DatosInvalidos(IActionResult destino)
         {
-            TempData["Error"] = "Los datos enviados no son válidos.";
+            const string mensaje = "Los datos enviados no son válidos.";
+
+            if (EsAjax)
+            {
+                return BadRequest(RespuestaAjax.Error(mensaje));
+            }
+
+            TempData["Error"] = mensaje;
             return destino;
         }
 

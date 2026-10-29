@@ -17,12 +17,12 @@ namespace BoardyWeb.Controllers
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            return View(await _rolMiembroService.ListarAsync(cancellationToken));
+            return Vista("_Lista", await _rolMiembroService.ListarAsync(cancellationToken));
         }
 
         public IActionResult Crear()
         {
-            return View(new CrearRolMiembroDto());
+            return VistaFormulario(new CrearRolMiembroDto());
         }
 
         [HttpPost]
@@ -31,7 +31,7 @@ namespace BoardyWeb.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
             var resultado = await _rolMiembroService.CrearAsync(dto, cancellationToken);
@@ -39,11 +39,10 @@ namespace BoardyWeb.Controllers
             if (!resultado.Exito)
             {
                 AgregarErrores(resultado);
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
-            Notificar(resultado);
-            return RedirectToAction(nameof(Index));
+            return Responder(resultado, RedirectToAction(nameof(Index)));
         }
 
         public async Task<IActionResult> Editar(int id, CancellationToken cancellationToken)
@@ -56,7 +55,7 @@ namespace BoardyWeb.Controllers
             }
 
             ViewData["RolMiembroId"] = id;
-            return View(new ActualizarRolMiembroDto { Nombre = rol.Datos!.Nombre, Descripcion = rol.Datos.Descripcion });
+            return VistaFormulario(new ActualizarRolMiembroDto { Nombre = rol.Datos!.Nombre, Descripcion = rol.Datos.Descripcion });
         }
 
         [HttpPost]
@@ -67,7 +66,7 @@ namespace BoardyWeb.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
             var resultado = await _rolMiembroService.ActualizarAsync(id, dto, cancellationToken);
@@ -80,11 +79,10 @@ namespace BoardyWeb.Controllers
             if (!resultado.Exito)
             {
                 AgregarErrores(resultado);
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
-            Notificar(resultado);
-            return RedirectToAction(nameof(Index));
+            return Responder(resultado, RedirectToAction(nameof(Index)));
         }
 
         [HttpPost]

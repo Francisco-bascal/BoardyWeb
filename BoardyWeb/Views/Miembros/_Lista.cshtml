@@ -1,0 +1,50 @@
+@model IReadOnlyList<TableroMiembroDto>
+@{
+    var tableroId = ViewData["TableroId"];
+    var roles = ViewData["Roles"] as SelectList;
+    var puedeAdministrar = ViewData["PuedeAdministrar"] is true;
+}
+
+<div id="region-miembros" data-region-url="@Url.Action("Index", "Miembros", new { tableroId })">
+    <table class="table align-middle">
+        <thead>
+            <tr><th>Miembro</th><th>Email</th><th>Roles</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var miembro in Model)
+            {
+                var editable = puedeAdministrar && !miembro.EsPropietario;
+                <tr>
+                    <td>@miembro.NombreCompleto</td>
+                    <td>@miembro.Email</td>
+                    <td>
+                        @foreach (var rol in miembro.Roles)
+                        {
+                            <span class="badge text-bg-secondary me-1">
+                                @rol.Nombre
+                                @if (editable && miembro.Roles.Count > 1)
+                                {
+                                    <button type="button" class="btn-close btn-close-white ms-1" style="font-size: .5rem" aria-label="Quitar rol"
+                                            data-accion-url="@Url.Action("QuitarRol", "Miembros", new { tableroId, tableroMiembroId = miembro.TableroMiembroId, rolMiembroId = rol.RolMiembroId })"></button>
+                                }
+                            </span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        @if (editable)
+                        {
+                            <form asp-action="AsignarRol" asp-route-tableroId="@tableroId" asp-route-tableroMiembroId="@miembro.TableroMiembroId" method="post"
+                                  class="d-inline-flex gap-1" data-ajax="true" data-ajax-method="post" data-ajax-success="ajaxFormExito" data-ajax-failure="ajaxFormFallo">
+                                <select name="RolMiembroId" class="form-select form-select-sm" asp-items="roles"></select>
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Asignar</button>
+                            </form>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    data-accion-url="@Url.Action("Quitar", "Miembros", new { tableroId, tableroMiembroId = miembro.TableroMiembroId })"
+                                    data-confirmar="¿Quitar a @miembro.NombreCompleto del tablero?">Quitar</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

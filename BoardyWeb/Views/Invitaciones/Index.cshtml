@@ -1,0 +1,8 @@
+@model IReadOnlyList<InvitacionTableroDto>
+@{
+    ViewData["Title"] = "Invitaciones";
+}
+
+<h1 class="h3 mb-3">Invitaciones recibidas</h1>
+
+<partial name="_ListaRecibidas" model="Model" />

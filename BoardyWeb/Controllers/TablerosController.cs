@@ -26,7 +26,7 @@ namespace BoardyWeb.Controllers
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            return View(await _tableroService.ListarDelUsuarioAsync(UsuarioId, cancellationToken));
+            return Vista("_Lista", await _tableroService.ListarDelUsuarioAsync(UsuarioId, cancellationToken));
         }
 
         public async Task<IActionResult> Detalle(int id, CancellationToken cancellationToken)
@@ -54,12 +54,12 @@ namespace BoardyWeb.Controllers
                 PuedeGestionar = await TienePermisoAsync(id, PoliticasTablero.GestionarTablero)
             };
 
-            return View(modelo);
+            return Vista("_Kanban", modelo);
         }
 
         public IActionResult Crear()
         {
-            return View(new CrearTableroDto());
+            return VistaFormulario(new CrearTableroDto());
         }
 
         [HttpPost]
@@ -68,7 +68,7 @@ namespace BoardyWeb.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
             var resultado = await _tableroService.CrearAsync(dto, UsuarioId, cancellationToken);
@@ -76,11 +76,10 @@ namespace BoardyWeb.Controllers
             if (!resultado.Exito)
             {
                 AgregarErrores(resultado);
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
-            Notificar(resultado);
-            return IrATablero(resultado.Datos!.TableroId);
+            return Responder(resultado, IrATablero(resultado.Datos!.TableroId));
         }
 
         public async Task<IActionResult> Editar(int id, CancellationToken cancellationToken)
@@ -99,7 +98,7 @@ namespace BoardyWeb.Controllers
             }
 
             ViewData["TableroId"] = id;
-            return View(new ActualizarTableroDto { Nombre = tablero.Datos!.Nombre, Descripcion = tablero.Datos.Descripcion });
+            return VistaFormulario(new ActualizarTableroDto { Nombre = tablero.Datos!.Nombre, Descripcion = tablero.Datos.Descripcion });
         }
 
         [HttpPost]
@@ -116,7 +115,7 @@ namespace BoardyWeb.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
             var resultado = await _tableroService.ActualizarAsync(id, dto, cancellationToken);
@@ -129,11 +128,10 @@ namespace BoardyWeb.Controllers
             if (!resultado.Exito)
             {
                 AgregarErrores(resultado);
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
-            Notificar(resultado);
-            return IrATablero(id);
+            return Responder(resultado, IrATablero(id));
         }
 
         [HttpPost]

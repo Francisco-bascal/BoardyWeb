@@ -17,12 +17,12 @@ namespace BoardyWeb.Controllers
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            return View(await _estadoTareaService.ListarAsync(cancellationToken));
+            return Vista("_Lista", await _estadoTareaService.ListarAsync(cancellationToken));
         }
 
         public IActionResult Crear()
         {
-            return View(new CrearEstadoTareaDto());
+            return VistaFormulario(new CrearEstadoTareaDto());
         }
 
         [HttpPost]
@@ -31,7 +31,7 @@ namespace BoardyWeb.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
             var resultado = await _estadoTareaService.CrearAsync(dto, cancellationToken);
@@ -39,11 +39,10 @@ namespace BoardyWeb.Controllers
             if (!resultado.Exito)
             {
                 AgregarErrores(resultado);
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
-            Notificar(resultado);
-            return RedirectToAction(nameof(Index));
+            return Responder(resultado, RedirectToAction(nameof(Index)));
         }
 
         public async Task<IActionResult> Editar(int id, CancellationToken cancellationToken)
@@ -56,7 +55,7 @@ namespace BoardyWeb.Controllers
             }
 
             ViewData["EstadoTareaId"] = id;
-            return View(new ActualizarEstadoTareaDto { Nombre = estado.Datos!.Nombre, Descripcion = estado.Datos.Descripcion });
+            return VistaFormulario(new ActualizarEstadoTareaDto { Nombre = estado.Datos!.Nombre, Descripcion = estado.Datos.Descripcion });
         }
 
         [HttpPost]
@@ -67,7 +66,7 @@ namespace BoardyWeb.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
             var resultado = await _estadoTareaService.ActualizarAsync(id, dto, cancellationToken);
@@ -80,11 +79,10 @@ namespace BoardyWeb.Controllers
             if (!resultado.Exito)
             {
                 AgregarErrores(resultado);
-                return View(dto);
+                return VistaFormulario(dto);
             }
 
-            Notificar(resultado);
-            return RedirectToAction(nameof(Index));
+            return Responder(resultado, RedirectToAction(nameof(Index)));
         }
 
         [HttpPost]

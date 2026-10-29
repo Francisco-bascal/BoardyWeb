@@ -1,0 +1,49 @@
+@model CrearTareaDto
+@{
+    var editando = ViewData["TareaId"] is not null;
+    var estados = ViewData["Estados"] as SelectList;
+}
+
+<form asp-action="@(editando ? "Editar" : "Crear")" asp-route-id="@ViewData["TareaId"]" asp-route-listaTareaId="@(editando ? null : ViewData["ListaTareaId"])" method="post"
+      data-ajax="true" data-cierra-modal data-ajax-method="post" data-ajax-success="ajaxFormExito" data-ajax-failure="ajaxFormFallo">
+    <div class="modal-header">
+        <h5 class="modal-title">@(editando ? "Editar tarea" : "Nueva tarea")</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+    </div>
+    <div class="modal-body">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="mb-3">
+            <label asp-for="Titulo" class="form-label"></label>
+            <input asp-for="Titulo" class="form-control" />
+            <span asp-validation-for="Titulo" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Descripcion" class="form-label"></label>
+            <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Descripcion" class="text-danger"></span>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label asp-for="Prioridad" class="form-label"></label>
+                <select asp-for="Prioridad" class="form-select" asp-items="Html.GetEnumSelectList<PrioridadTarea>()"></select>
+                <span asp-validation-for="Prioridad" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="EstadoTareaId" class="form-label"></label>
+                <select asp-for="EstadoTareaId" class="form-select" asp-items="estados">
+                    <option value="">Seleccioná un estado</option>
+                </select>
+                <span asp-validation-for="EstadoTareaId" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="FechaVencimiento" class="form-label"></label>
+                <input asp-for="FechaVencimiento" class="form-control" />
+                <span asp-validation-for="FechaVencimiento" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a asp-controller="Tableros" asp-action="Index" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</a>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+</form>

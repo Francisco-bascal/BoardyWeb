@@ -19,7 +19,7 @@ namespace BoardyWeb.Controllers
         /// <summary>Invitaciones pendientes recibidas por el usuario actual.</summary>
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            return View(await _invitacionService.ListarRecibidasAsync(UsuarioId, cancellationToken));
+            return Vista("_ListaRecibidas", await _invitacionService.ListarRecibidasAsync(UsuarioId, cancellationToken));
         }
 
         /// <summary>Invitaciones enviadas desde un tablero.</summary>
@@ -32,7 +32,7 @@ namespace BoardyWeb.Controllers
             }
 
             ViewData["TableroId"] = tableroId;
-            return View(await _invitacionService.ListarDelTableroAsync(tableroId, cancellationToken));
+            return Vista("_ListaEnviadas", await _invitacionService.ListarDelTableroAsync(tableroId, cancellationToken));
         }
 
         [HttpPost]

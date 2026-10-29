@@ -1,0 +1,25 @@
+@model IReadOnlyList<InvitacionTableroDto>
+@{
+    ViewData["Title"] = "Invitaciones del tablero";
+    var tableroId = ViewData["TableroId"];
+}
+
+<div class="mb-3">
+    <a asp-controller="Tableros" asp-action="Detalle" asp-route-id="@tableroId">&larr; Volver al tablero</a>
+    <h1 class="h3 mb-0">Invitaciones enviadas</h1>
+</div>
+
+<form asp-action="Crear" asp-route-tableroId="@tableroId" method="post" class="row g-2 mb-4"
+      data-ajax="true" data-ajax-method="post" data-ajax-success="ajaxFormExito" data-ajax-failure="ajaxFormFallo">
+    <div class="col-md-4">
+        <input name="Email" type="email" class="form-control" placeholder="Email del usuario" required />
+    </div>
+    <div class="col-md-5">
+        <input name="Mensaje" class="form-control" placeholder="Mensaje (opcional)" maxlength="500" />
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Invitar</button>
+    </div>
+</form>
+
+<partial name="_ListaEnviadas" model="Model" />

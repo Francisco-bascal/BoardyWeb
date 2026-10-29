@@ -1,4 +1,5 @@
 using BoardyWeb.Autorizacion;
+using BoardyWeb.Comun;
 using BoardyWeb.Data;
 using BoardyWeb.Models;
 using BoardyWeb.Services;
@@ -9,7 +10,11 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+    options.ModelMetadataDetailsProviders.Add(new TextoVacioProvider());
+});
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -44,6 +49,8 @@ builder.Services.AddScoped<IListaTareaService, ListaTareaService>();
 builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
 builder.Services.AddScoped<ITareaService, TareaService>();
 builder.Services.AddScoped<IComentarioService, ComentarioService>();
+
+builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddRazorPages();

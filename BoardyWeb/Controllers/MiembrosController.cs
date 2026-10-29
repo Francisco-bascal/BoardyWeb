@@ -34,7 +34,7 @@ namespace BoardyWeb.Controllers
             ViewData["Roles"] = new SelectList(roles, nameof(RolMiembroDto.RolMiembroId), nameof(RolMiembroDto.Nombre));
             ViewData["PuedeAdministrar"] = await TienePermisoAsync(tableroId, PoliticasTablero.AdministrarTablero);
 
-            return View(await _miembroService.ListarAsync(tableroId, cancellationToken));
+            return Vista("_Lista", await _miembroService.ListarAsync(tableroId, cancellationToken));
         }
 
         [HttpPost]

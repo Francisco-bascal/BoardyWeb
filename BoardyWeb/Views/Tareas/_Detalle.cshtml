@@ -1,0 +1,150 @@
+@model TareaDetalleViewModel
+@{
+    var tarea = Model.Tarea;
+    var etiquetasLibres = Model.EtiquetasDelTablero.Where(e => tarea.Etiquetas.All(x => x.EtiquetaId != e.EtiquetaId)).ToList();
+    var miembrosLibres = Model.MiembrosDelTablero.Where(m => tarea.Miembros.All(x => x.TableroMiembroId != m.TableroMiembroId)).ToList();
+}
+
+<div id="region-tarea" data-region-url="@Url.Action("Detalle", "Tareas", new { id = tarea.TareaId })">
+    <div class="modal-header">
+        <div>
+            <h5 class="modal-title">@tarea.Titulo</h5>
+            <small class="text-muted">@tarea.TableroNombre &rsaquo; @tarea.ListaNombre</small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+    </div>
+
+    <div class="modal-body">
+        @if (!string.IsNullOrWhiteSpace(tarea.Descripcion))
+        {
+            <p>@tarea.Descripcion</p>
+        }
+
+        <dl class="row mb-3">
+            <dt class="col-sm-3">Prioridad</dt>
+            <dd class="col-sm-9">@tarea.Prioridad</dd>
+            <dt class="col-sm-3">Estado</dt>
+            <dd class="col-sm-9">
+                @tarea.EstadoNombre
+                @if (Model.PuedeColaborar)
+                {
+                    <div class="dropdown d-inline-block ms-2">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Cambiar</button>
+                        <ul class="dropdown-menu">
+                            @foreach (var estado in Model.Estados.Where(e => e.EstadoTareaId != tarea.EstadoTareaId))
+                            {
+                                <li><button type="button" class="dropdown-item" data-accion-url="@Url.Action("CambiarEstado", "Tareas", new { id = tarea.TareaId, EstadoTareaId = estado.EstadoTareaId })">@estado.Nombre</button></li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </dd>
+            <dt class="col-sm-3">Vencimiento</dt>
+            <dd class="col-sm-9">@(tarea.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "Sin fecha")</dd>
+            <dt class="col-sm-3">Etiquetas</dt>
+            <dd class="col-sm-9">
+                @foreach (var etiqueta in tarea.Etiquetas)
+                {
+                    <span class="badge me-1" style="background-color: @etiqueta.Color">
+                        @etiqueta.Nombre
+                        @if (Model.PuedeColaborar)
+                        {
+                            <button type="button" class="btn-close btn-close-white ms-1" style="font-size: .5rem" aria-label="Quitar etiqueta"
+                                    data-accion-url="@Url.Action("QuitarEtiqueta", "Tareas", new { id = tarea.TareaId, etiquetaId = etiqueta.EtiquetaId })"></button>
+                        }
+                    </span>
+                }
+                @if (Model.PuedeColaborar && etiquetasLibres.Any())
+                {
+                    <div class="dropdown d-inline-block">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Agregar</button>
+                        <ul class="dropdown-menu">
+                            @foreach (var etiqueta in etiquetasLibres)
+                            {
+                                <li><button type="button" class="dropdown-item" data-accion-url="@Url.Action("AsignarEtiqueta", "Tareas", new { id = tarea.TareaId, etiquetaId = etiqueta.EtiquetaId })">@etiqueta.Nombre</button></li>
+                            }
+                        </ul>
+                    </div>
+                }
+                @if (!tarea.Etiquetas.Any() && !(Model.PuedeColaborar && etiquetasLibres.Any()))
+                {
+                    <span class="text-muted">Sin etiquetas</span>
+                }
+            </dd>
+            <dt class="col-sm-3">Asignados</dt>
+            <dd class="col-sm-9">
+                @foreach (var miembro in tarea.Miembros)
+                {
+                    <span class="badge text-bg-light border me-1">
+                        @miembro.NombreCompleto
+                        @if (Model.PuedeAdministrar)
+                        {
+                            <button type="button" class="btn-close ms-1" style="font-size: .5rem" aria-label="Quitar miembro"
+                                    data-accion-url="@Url.Action("QuitarMiembro", "Tareas", new { id = tarea.TareaId, tableroMiembroId = miembro.TableroMiembroId })"></button>
+                        }
+                    </span>
+                }
+                @if (Model.PuedeAdministrar && miembrosLibres.Any())
+                {
+                    <div class="dropdown d-inline-block">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Asignar</button>
+                        <ul class="dropdown-menu">
+                            @foreach (var miembro in miembrosLibres)
+                            {
+                                <li><button type="button" class="dropdown-item" data-accion-url="@Url.Action("AsignarMiembro", "Tareas", new { id = tarea.TareaId, tableroMiembroId = miembro.TableroMiembroId })">@miembro.NombreCompleto</button></li>
+                            }
+                        </ul>
+                    </div>
+                }
+                @if (!tarea.Miembros.Any() && !(Model.PuedeAdministrar && miembrosLibres.Any()))
+                {
+                    <span class="text-muted">Sin asignar</span>
+                }
+            </dd>
+        </dl>
+
+        <hr />
+        <h6>Comentarios</h6>
+        @if (!Model.Comentarios.Any())
+        {
+            <p class="text-muted">Todavía no hay comentarios.</p>
+        }
+        @foreach (var comentario in Model.Comentarios)
+        {
+            <div class="border rounded p-2 mb-2">
+                <div class="d-flex justify-content-between">
+                    <strong>@comentario.UsuarioNombre</strong>
+                    <small class="text-muted">@comentario.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</small>
+                </div>
+                <div>@comentario.Contenido</div>
+                @if (Model.PuedeColaborar)
+                {
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0"
+                            data-accion-url="@Url.Action("Eliminar", "Comentarios", new { id = comentario.ComentarioId, tareaId = tarea.TareaId })"
+                            data-confirmar="¿Eliminar el comentario?">Eliminar</button>
+                }
+            </div>
+        }
+
+        @if (Model.PuedeColaborar)
+        {
+            <form asp-controller="Comentarios" asp-action="Crear" asp-route-tareaId="@tarea.TareaId" method="post"
+                  data-ajax="true" data-ajax-method="post" data-ajax-success="ajaxFormExito" data-ajax-failure="ajaxFormFallo">
+                <div class="input-group">
+                    <textarea name="Contenido" class="form-control" rows="2" maxlength="2000" placeholder="Escribí un comentario..." required></textarea>
+                    <button type="submit" class="btn btn-primary">Comentar</button>
+                </div>
+            </form>
+        }
+    </div>
+
+    <div class="modal-footer">
+        @if (Model.PuedeAdministrar)
+        {
+            <button type="button" class="btn btn-outline-primary" data-modal-url="@Url.Action("Editar", "Tareas", new { id = tarea.TareaId })">Editar</button>
+            <button type="button" class="btn btn-outline-danger" data-accion-url="@Url.Action("Eliminar", "Tareas", new { id = tarea.TareaId })"
+                    data-confirmar="¿Eliminar la tarea @tarea.Titulo?" data-cierra-modal>Eliminar</button>
+        }
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+    </div>
+</div>

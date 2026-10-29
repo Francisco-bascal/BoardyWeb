@@ -1,0 +1,124 @@
+@model TableroKanbanViewModel
+@{
+    var tablero = Model.Tablero;
+
+    string ClasePrioridad(PrioridadTarea prioridad) => prioridad switch
+    {
+        PrioridadTarea.Baja => "secondary",
+        PrioridadTarea.Media => "info",
+        PrioridadTarea.Alta => "warning",
+        _ => "danger"
+    };
+}
+
+<div id="region-kanban" data-region-url="@Url.Action("Detalle", "Tableros", new { id = tablero.TableroId })">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h1 class="h3 mb-0">@tablero.Nombre</h1>
+            <p class="text-muted mb-0">@tablero.Descripcion</p>
+            <small class="text-muted">Propietario: @tablero.PropietarioNombre</small>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-controller="Miembros" asp-action="Index" asp-route-tableroId="@tablero.TableroId" class="btn btn-outline-secondary">Miembros</a>
+            <a asp-controller="Etiquetas" asp-action="Index" asp-route-tableroId="@tablero.TableroId" class="btn btn-outline-secondary">Etiquetas</a>
+            @if (Model.PuedeAdministrar)
+            {
+                <a asp-controller="Invitaciones" asp-action="DelTablero" asp-route-tableroId="@tablero.TableroId" class="btn btn-outline-secondary">Invitaciones</a>
+                <button type="button" class="btn btn-primary" data-modal-url="@Url.Action("Crear", "ListasTarea", new { tableroId = tablero.TableroId })">Nueva lista</button>
+            }
+            @if (Model.PuedeGestionar)
+            {
+                <button type="button" class="btn btn-outline-primary" data-modal-url="@Url.Action("Editar", "Tableros", new { id = tablero.TableroId })">Editar tablero</button>
+                <button type="button" class="btn btn-outline-danger" data-accion-url="@Url.Action("Eliminar", "Tableros", new { id = tablero.TableroId })"
+                        data-confirmar="¿Eliminar el tablero y todo su contenido? Esta acción no se puede deshacer."
+                        data-redirigir="@Url.Action("Index", "Tableros")">Eliminar tablero</button>
+            }
+        </div>
+    </div>
+
+    @if (!Model.Listas.Any())
+    {
+        <p class="text-muted">Este tablero todavía no tiene listas.</p>
+    }
+
+    <div class="kanban">
+        @for (var i = 0; i < Model.Listas.Count; i++)
+        {
+            var lista = Model.Listas[i];
+            var tareas = Model.Tareas.Where(t => t.ListaTareaId == lista.ListaTareaId).OrderBy(t => t.Orden).ToList();
+
+            <div class="kanban-columna">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="h6 mb-0">@lista.Nombre <span class="badge text-bg-secondary">@tareas.Count</span></h2>
+                    @if (Model.PuedeAdministrar)
+                    {
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Opciones de la lista">&#8943;</button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><button type="button" class="dropdown-item" data-modal-url="@Url.Action("Editar", "ListasTarea", new { id = lista.ListaTareaId })">Editar lista</button></li>
+                                @if (i > 0)
+                                {
+                                    <li><button type="button" class="dropdown-item" data-accion-url="@Url.Action("Reordenar", "ListasTarea", new { id = lista.ListaTareaId, NuevoOrden = lista.Orden - 1 })">Mover a la izquierda</button></li>
+                                }
+                                @if (i < Model.Listas.Count - 1)
+                                {
+                                    <li><button type="button" class="dropdown-item" data-accion-url="@Url.Action("Reordenar", "ListasTarea", new { id = lista.ListaTareaId, NuevoOrden = lista.Orden + 1 })">Mover a la derecha</button></li>
+                                }
+                                <li><button type="button" class="dropdown-item text-danger" data-accion-url="@Url.Action("Eliminar", "ListasTarea", new { id = lista.ListaTareaId })" data-confirmar="¿Eliminar la lista @lista.Nombre?">Eliminar lista</button></li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+
+                @foreach (var tarea in tareas)
+                {
+                    <div class="card mb-2 kanban-tarjeta">
+                        <div class="card-body p-2">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <a href="#" class="fw-semibold text-decoration-none" data-modal-url="@Url.Action("Detalle", "Tareas", new { id = tarea.TareaId })">@tarea.Titulo</a>
+                                <span class="badge text-bg-@ClasePrioridad(tarea.Prioridad)">@tarea.Prioridad</span>
+                            </div>
+                            <div class="small text-muted mt-1">
+                                @tarea.EstadoNombre
+                                @if (tarea.FechaVencimiento.HasValue)
+                                {
+                                    <span> · Vence @tarea.FechaVencimiento.Value.ToString("dd/MM/yyyy")</span>
+                                }
+                            </div>
+                            @if (tarea.Etiquetas.Any())
+                            {
+                                <div class="mt-1">
+                                    @foreach (var etiqueta in tarea.Etiquetas)
+                                    {
+                                        <span class="badge" style="background-color: @etiqueta.Color">@etiqueta.Nombre</span>
+                                    }
+                                </div>
+                            }
+                            @if (tarea.Miembros.Any())
+                            {
+                                <div class="small mt-1">@string.Join(", ", tarea.Miembros.Select(m => m.NombreCompleto))</div>
+                            }
+                            @if (Model.PuedeColaborar && Model.Listas.Count > 1)
+                            {
+                                <div class="dropdown mt-1">
+                                    <button class="btn btn-sm btn-link p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">Mover a...</button>
+                                    <ul class="dropdown-menu">
+                                        @foreach (var destino in Model.Listas.Where(l => l.ListaTareaId != lista.ListaTareaId))
+                                        {
+                                            <li><button type="button" class="dropdown-item" data-accion-url="@Url.Action("Mover", "Tareas", new { id = tarea.TareaId, ListaTareaId = destino.ListaTareaId })">@destino.Nombre</button></li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (Model.PuedeAdministrar)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-primary w-100" data-modal-url="@Url.Action("Crear", "Tareas", new { listaTareaId = lista.ListaTareaId })">Agregar tarea</button>
+                }
+            </div>
+        }
+    </div>
+</div>

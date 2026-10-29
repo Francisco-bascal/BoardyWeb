@@ -1,0 +1,29 @@
+@model CrearRolMiembroDto
+@{
+    var editando = ViewData["RolMiembroId"] is not null;
+}
+
+<form asp-action="@(editando ? "Editar" : "Crear")" asp-route-id="@ViewData["RolMiembroId"]" method="post"
+      data-ajax="true" data-cierra-modal data-ajax-method="post" data-ajax-success="ajaxFormExito" data-ajax-failure="ajaxFormFallo">
+    <div class="modal-header">
+        <h5 class="modal-title">@(editando ? "Editar rol" : "Nuevo rol")</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+    </div>
+    <div class="modal-body">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="mb-3">
+            <label asp-for="Nombre" class="form-label"></label>
+            <input asp-for="Nombre" class="form-control" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Descripcion" class="form-label"></label>
+            <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Descripcion" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a asp-action="Index" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</a>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+</form>
