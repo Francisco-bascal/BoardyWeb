@@ -38,18 +38,21 @@
                 <a asp-controller="Invitaciones" asp-action="DelTablero" asp-route-tableroId="@tablero.TableroId" class="btn btn-outline-secondary"><i class="bi bi-envelope-plus me-1"></i>Invitaciones</a>
                 <button type="button" class="btn btn-primary" data-modal-url="@Url.Action("Crear", "ListasTarea", new { tableroId = tablero.TableroId })"><i class="bi bi-plus-lg me-1"></i>Nueva lista</button>
             }
-            @if (Model.PuedeGestionar)
+            @if (Model.PuedeAdministrar)
             {
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Opciones del tablero"><i class="bi bi-three-dots"></i></button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><button type="button" class="dropdown-item" data-modal-url="@Url.Action("Editar", "Tableros", new { id = tablero.TableroId })"><i class="bi bi-pencil me-2"></i>Editar tablero</button></li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li>
-                            <button type="button" class="dropdown-item text-danger" data-accion-url="@Url.Action("Eliminar", "Tableros", new { id = tablero.TableroId })"
-                                    data-confirmar="¿Eliminar el tablero y todo su contenido? Esta acción no se puede deshacer."
-                                    data-redirigir="@Url.Action("Index", "Tableros")"><i class="bi bi-trash me-2"></i>Eliminar tablero</button>
-                        </li>
+                        @if (Model.PuedeGestionar)
+                        {
+                            <li><hr class="dropdown-divider" /></li>
+                            <li>
+                                <button type="button" class="dropdown-item text-danger" data-accion-url="@Url.Action("Eliminar", "Tableros", new { id = tablero.TableroId })"
+                                        data-confirmar="¿Eliminar el tablero y todo su contenido? Esta acción no se puede deshacer."
+                                        data-redirigir="@Url.Action("Index", "Tableros")"><i class="bi bi-trash me-2"></i>Eliminar tablero</button>
+                            </li>
+                        }
                     </ul>
                 </div>
             }
@@ -107,7 +110,11 @@
                     <div class="kanban-vacio">Sin tareas</div>
                     @foreach (var tarea in tareas)
                     {
-                        <div class="tarjeta-tarea kanban-tarjeta prioridad-@tarea.Prioridad.ToString().ToLowerInvariant()" data-url-mover="@Url.Action("Mover", "Tareas", new { id = tarea.TareaId })">
+                        // Propietario/Administrador mueven cualquier tarea; el Operario solo las que tiene asignadas.
+                        var puedeTrabajar = Model.PuedeAdministrar
+                            || (Model.PuedeColaborar && tarea.Miembros.Any(m => m.UsuarioId == Model.UsuarioActualId));
+
+                        <div class="tarjeta-tarea kanban-tarjeta@(puedeTrabajar ? "" : " tarjeta-fija") prioridad-@tarea.Prioridad.ToString().ToLowerInvariant()" data-url-mover="@Url.Action("Mover", "Tareas", new { id = tarea.TareaId })">
                             <div class="d-flex justify-content-between align-items-start gap-2">
                                 <a href="#" class="titulo" data-modal-url="@Url.Action("Detalle", "Tareas", new { id = tarea.TareaId })">@tarea.Titulo</a>
                                 <span class="chip chip-prioridad">@tarea.Prioridad</span>
@@ -128,7 +135,7 @@
                                 </div>
                             }
 
-                            @if (tarea.Miembros.Any() || (Model.PuedeColaborar && Model.Listas.Count > 1))
+                            @if (tarea.Miembros.Any() || (puedeTrabajar && Model.Listas.Count > 1))
                             {
                                 <div class="d-flex justify-content-between align-items-center mt-2">
                                     <div class="avatares">
@@ -137,7 +144,7 @@
                                             <span class="avatar" title="@miembro.NombreCompleto">@Iniciales(miembro.NombreCompleto)</span>
                                         }
                                     </div>
-                                    @if (Model.PuedeColaborar && Model.Listas.Count > 1)
+                                    @if (puedeTrabajar && Model.Listas.Count > 1)
                                     {
                                         <div class="dropdown">
                                             <button class="btn btn-sm btn-link p-0 text-suave text-decoration-none" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-arrow-left-right me-1"></i>Mover</button>

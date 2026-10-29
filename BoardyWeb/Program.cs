@@ -39,9 +39,13 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy(PoliticasTablero.GestionarTablero, politica => politica.AddRequirements(
         new RolTableroRequirement(RolesTablero.Propietario)));
+
+    options.AddPolicy(PoliticasTarea.TrabajarEnTarea, politica => politica.AddRequirements(
+        new TrabajoEnTareaRequirement()));
 });
 
 builder.Services.AddScoped<IAuthorizationHandler, RolTableroHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, TrabajoEnTareaHandler>();
 
 builder.Services.AddScoped<IEstadoTareaService, EstadoTareaService>();
 builder.Services.AddScoped<IRolMiembroService, RolMiembroService>();

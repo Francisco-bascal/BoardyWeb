@@ -74,16 +74,30 @@ namespace BoardyWeb.Data
 
         private static async Task SeedRolesMiembroAsync(AppDbContext context)
         {
-            if (await context.RolMiembros.AnyAsync())
+            var rolesDelSistema = new Dictionary<string, string>
             {
-                return;
-            }
+                [RolesTablero.Propietario] = "Dueño del tablero. Administra todo, lo elimina y puede transferir la propiedad.",
+                [RolesTablero.Administrador] = "Crea y administra listas, tareas, etiquetas, miembros e invitaciones del tablero.",
+                [RolesTablero.Operario] = "Comenta y, en las tareas que tiene asignadas, cambia estado y etiquetas y las mueve.",
+                [RolesTablero.Lector] = "Solo consulta el tablero."
+            };
 
-            context.RolMiembros.AddRange(
-                new RolMiembro { Nombre = RolesTablero.Propietario, Descripcion = "Dueño del tablero." },
-                new RolMiembro { Nombre = RolesTablero.Administrador, Descripcion = "Crea y administra tareas del tablero." },
-                new RolMiembro { Nombre = RolesTablero.Operario, Descripcion = "Marca tareas como finalizadas, agrega etiquetas y comentarios." },
-                new RolMiembro { Nombre = RolesTablero.Lector, Descripcion = "Solo consulta el tablero." });
+            var existentes = await context.RolMiembros.ToListAsync();
+
+            // Se crean los que faltan y se mantienen al día las descripciones de los roles del sistema.
+            foreach (var (nombre, descripcion) in rolesDelSistema)
+            {
+                var rol = existentes.FirstOrDefault(r => r.Nombre == nombre);
+
+                if (rol is null)
+                {
+                    context.RolMiembros.Add(new RolMiembro { Nombre = nombre, Descripcion = descripcion });
+                }
+                else
+                {
+                    rol.Descripcion = descripcion;
+                }
+            }
 
             await context.SaveChangesAsync();
         }

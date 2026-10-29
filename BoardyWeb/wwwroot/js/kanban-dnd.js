@@ -71,27 +71,38 @@
         });
     }
 
+    // Sortable informa dos índices: newIndex/oldIndex cuentan TODOS los hijos del contenedor (incluido el
+    // aviso "Sin tareas"), mientras que newDraggableIndex/oldDraggableIndex cuentan solo las tarjetas.
+    // El servidor ordena únicamente tarjetas, por lo que siempre se usan los índices "draggable".
+    function posicionNueva(evento) {
+        return evento.newDraggableIndex !== undefined ? evento.newDraggableIndex : evento.newIndex;
+    }
+
+    function posicionAnterior(evento) {
+        return evento.oldDraggableIndex !== undefined ? evento.oldDraggableIndex : evento.oldIndex;
+    }
+
     function alSoltarTarea(evento) {
         const listaDestino = $(evento.to).data('lista-id');
         const listaOrigen = $(evento.from).data('lista-id');
 
-        if (listaDestino === listaOrigen && evento.newIndex === evento.oldIndex) {
+        if (listaDestino === listaOrigen && posicionNueva(evento) === posicionAnterior(evento)) {
             return;
         }
 
         actualizarContadores();
         encolar($(evento.item).data('url-mover'), {
             ListaTareaId: listaDestino,
-            NuevoOrden: evento.newIndex + 1
+            NuevoOrden: posicionNueva(evento) + 1
         });
     }
 
     function alSoltarLista(evento) {
-        if (evento.newIndex === evento.oldIndex) {
+        if (posicionNueva(evento) === posicionAnterior(evento)) {
             return;
         }
 
-        encolar($(evento.item).data('url-reordenar'), { NuevoOrden: evento.newIndex + 1 });
+        encolar($(evento.item).data('url-reordenar'), { NuevoOrden: posicionNueva(evento) + 1 });
     }
 
     function inicializar() {
@@ -108,7 +119,7 @@
                     group: 'tareas',
                     animation: 150,
                     draggable: '.kanban-tarjeta',
-                    filter: 'a, button, .dropdown, .dropdown-menu',
+                    filter: 'a, button, .dropdown, .dropdown-menu, .tarjeta-fija',
                     preventOnFilter: false,
                     delay: 150,
                     delayOnTouchOnly: true,

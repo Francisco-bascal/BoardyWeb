@@ -1,3 +1,4 @@
+using BoardyWeb.Comun;
 using System.ComponentModel.DataAnnotations;
 using BoardyWeb.Models;
 
@@ -47,6 +48,8 @@ namespace BoardyWeb.DTOs
 
         [Display(Name = "Fecha de vencimiento")]
         [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        [FechaRazonable]
         public DateTime? FechaVencimiento { get; set; }
 
         [EnumDataType(typeof(PrioridadTarea), ErrorMessage = "La prioridad seleccionada no es válida.")]
@@ -54,6 +57,7 @@ namespace BoardyWeb.DTOs
         public PrioridadTarea Prioridad { get; set; } = PrioridadTarea.Media;
 
         [Display(Name = "Estado")]
+        [Required(ErrorMessage = "Debés seleccionar un estado.")]
         [Range(1, int.MaxValue, ErrorMessage = "Debés seleccionar un estado.")]
         public int EstadoTareaId { get; set; }
     }

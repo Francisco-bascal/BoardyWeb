@@ -49,6 +49,7 @@ namespace BoardyWeb.Controllers
                 Tablero = tablero.Datos!,
                 Listas = await _listaTareaService.ListarAsync(id, cancellationToken),
                 Tareas = await _tareaService.ListarPorTableroAsync(id, cancellationToken),
+                UsuarioActualId = UsuarioId,
                 PuedeColaborar = await TienePermisoAsync(id, PoliticasTablero.ColaborarEnTablero),
                 PuedeAdministrar = await TienePermisoAsync(id, PoliticasTablero.AdministrarTablero),
                 PuedeGestionar = await TienePermisoAsync(id, PoliticasTablero.GestionarTablero)
@@ -84,7 +85,7 @@ namespace BoardyWeb.Controllers
 
         public async Task<IActionResult> Editar(int id, CancellationToken cancellationToken)
         {
-            var acceso = await ValidarAccesoAsync(id, PoliticasTablero.GestionarTablero);
+            var acceso = await ValidarAccesoAsync(id, PoliticasTablero.AdministrarTablero);
             if (acceso is not null)
             {
                 return acceso;
@@ -105,7 +106,7 @@ namespace BoardyWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Editar(int id, ActualizarTableroDto dto, CancellationToken cancellationToken)
         {
-            var acceso = await ValidarAccesoAsync(id, PoliticasTablero.GestionarTablero);
+            var acceso = await ValidarAccesoAsync(id, PoliticasTablero.AdministrarTablero);
             if (acceso is not null)
             {
                 return acceso;

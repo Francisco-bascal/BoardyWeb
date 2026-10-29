@@ -14,7 +14,13 @@ namespace BoardyWeb.Models.ViewModels
 
         public IReadOnlyList<TableroMiembroDto> MiembrosDelTablero { get; set; } = new List<TableroMiembroDto>();
 
-        public bool PuedeColaborar { get; set; }
+        public string UsuarioActualId { get; set; } = string.Empty;
+
+        /// <summary>Puede comentar (Propietario, Administrador u Operario).</summary>
+        public bool PuedeComentar { get; set; }
+
+        /// <summary>Puede cambiar estado y etiquetas (Operario solo si está asignado a la tarea).</summary>
+        public bool PuedeTrabajarEnTarea { get; set; }
 
         public bool PuedeAdministrar { get; set; }
     }

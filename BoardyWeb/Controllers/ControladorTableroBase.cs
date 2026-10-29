@@ -21,6 +21,12 @@ namespace BoardyWeb.Controllers
             return resultado.Succeeded;
         }
 
+        protected async Task<bool> TienePermisoSobreTareaAsync(int tareaId, string politica)
+        {
+            var resultado = await _autorizacion.AuthorizeAsync(User, tareaId, politica);
+            return resultado.Succeeded;
+        }
+
         /// <summary>
         /// Devuelve 404 si el tablero no pudo resolverse, 403 si el usuario no cumple la política;
         /// null si puede continuar.

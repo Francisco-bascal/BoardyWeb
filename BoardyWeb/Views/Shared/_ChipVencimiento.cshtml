@@ -8,6 +8,7 @@
 
     var finalizada = Model.EstadoNombre == VencimientoTarea.NombreEstadoFinalizado;
     var (estado, descripcion) = VencimientoTarea.Calcular(Model.FechaVencimiento.Value, finalizada);
+    var detalle = $"{descripcion} · vencimiento {Model.FechaVencimiento.Value:dd/MM/yyyy} · hoy es {DateTime.Today:dd/MM/yyyy} (fecha del servidor)";
     var formato = ViewData["Completo"] is true ? "dd/MM/yyyy" : "dd/MM";
     var icono = estado switch
     {
@@ -17,6 +18,6 @@
     };
 }
 
-<span class="chip chip-vencimiento chip-vencimiento-@estado.ToString().ToLowerInvariant()" title="@descripcion">
+<span class="chip chip-vencimiento chip-vencimiento-@estado.ToString().ToLowerInvariant()" title="@detalle">
     <i class="bi bi-@icono"></i> @Model.FechaVencimiento.Value.ToString(formato)
 </span>

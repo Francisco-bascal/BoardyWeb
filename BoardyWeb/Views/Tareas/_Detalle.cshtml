@@ -26,7 +26,7 @@
             <dt class="col-sm-3">Estado</dt>
             <dd class="col-sm-9">
                 @tarea.EstadoNombre
-                @if (Model.PuedeColaborar)
+                @if (Model.PuedeTrabajarEnTarea)
                 {
                     <div class="dropdown d-inline-block ms-2">
                         <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Cambiar</button>
@@ -56,14 +56,14 @@
                 {
                     <span class="badge me-1" style="background-color: @etiqueta.Color">
                         @etiqueta.Nombre
-                        @if (Model.PuedeColaborar)
+                        @if (Model.PuedeTrabajarEnTarea)
                         {
                             <button type="button" class="btn-close btn-close-white ms-1" style="font-size: .5rem" aria-label="Quitar etiqueta"
                                     data-accion-url="@Url.Action("QuitarEtiqueta", "Tareas", new { id = tarea.TareaId, etiquetaId = etiqueta.EtiquetaId })"></button>
                         }
                     </span>
                 }
-                @if (Model.PuedeColaborar && etiquetasLibres.Any())
+                @if (Model.PuedeTrabajarEnTarea && etiquetasLibres.Any())
                 {
                     <div class="dropdown d-inline-block">
                         <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Agregar</button>
@@ -75,7 +75,7 @@
                         </ul>
                     </div>
                 }
-                @if (!tarea.Etiquetas.Any() && !(Model.PuedeColaborar && etiquetasLibres.Any()))
+                @if (!tarea.Etiquetas.Any() && !(Model.PuedeTrabajarEnTarea && etiquetasLibres.Any()))
                 {
                     <span class="text-muted">Sin etiquetas</span>
                 }
@@ -126,7 +126,7 @@
                     <small class="text-muted">@comentario.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</small>
                 </div>
                 <div>@comentario.Contenido</div>
-                @if (Model.PuedeColaborar)
+                @if (Model.PuedeComentar && (comentario.UsuarioId == Model.UsuarioActualId || Model.PuedeAdministrar))
                 {
                     <button type="button" class="btn btn-sm btn-link text-danger p-0"
                             data-accion-url="@Url.Action("Eliminar", "Comentarios", new { id = comentario.ComentarioId, tareaId = tarea.TareaId })"
@@ -135,7 +135,7 @@
             </div>
         }
 
-        @if (Model.PuedeColaborar)
+        @if (Model.PuedeComentar)
         {
             <form asp-controller="Comentarios" asp-action="Crear" asp-route-tareaId="@tarea.TareaId" method="post"
                   data-ajax="true" data-ajax-method="post" data-ajax-success="ajaxFormExito" data-ajax-failure="ajaxFormFallo">

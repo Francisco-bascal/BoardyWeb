@@ -787,8 +787,12 @@ a {
   transition: none;
 }
 
-.kanban[data-puede-colaborar="true"] .tarjeta-tarea {
+.kanban[data-puede-colaborar="true"] .tarjeta-tarea:not(.tarjeta-fija) {
   cursor: grab;
+}
+
+.tarjeta-fija {
+  cursor: default;
 }
 
 .tarjeta-tarea .titulo {

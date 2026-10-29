@@ -56,7 +56,9 @@ namespace BoardyWeb.Controllers
                 Estados = await _estadoTareaService.ListarAsync(cancellationToken),
                 EtiquetasDelTablero = await _etiquetaService.ListarAsync(tableroId, cancellationToken),
                 MiembrosDelTablero = await _miembroService.ListarAsync(tableroId, cancellationToken),
-                PuedeColaborar = await TienePermisoAsync(tableroId, PoliticasTablero.ColaborarEnTablero),
+                UsuarioActualId = UsuarioId,
+                PuedeComentar = await TienePermisoAsync(tableroId, PoliticasTablero.ColaborarEnTablero),
+                PuedeTrabajarEnTarea = await TienePermisoSobreTareaAsync(id, PoliticasTarea.TrabajarEnTarea),
                 PuedeAdministrar = await TienePermisoAsync(tableroId, PoliticasTablero.AdministrarTablero)
             };
 
@@ -186,7 +188,7 @@ namespace BoardyWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Mover(int id, MoverTareaDto dto, CancellationToken cancellationToken)
         {
-            var (error, tableroId) = await AutorizarTareaAsync(id, PoliticasTablero.ColaborarEnTablero, cancellationToken);
+            var (error, tableroId) = await AutorizarTrabajoEnTareaAsync(id, cancellationToken);
             if (error is not null)
             {
                 return error;
@@ -205,7 +207,7 @@ namespace BoardyWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CambiarEstado(int id, CambiarEstadoTareaDto dto, CancellationToken cancellationToken)
         {
-            var (error, _) = await AutorizarTareaAsync(id, PoliticasTablero.ColaborarEnTablero, cancellationToken);
+            var (error, _) = await AutorizarTrabajoEnTareaAsync(id, cancellationToken);
             if (error is not null)
             {
                 return error;
@@ -224,7 +226,7 @@ namespace BoardyWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AsignarEtiqueta(int id, int etiquetaId, CancellationToken cancellationToken)
         {
-            var (error, _) = await AutorizarTareaAsync(id, PoliticasTablero.ColaborarEnTablero, cancellationToken);
+            var (error, _) = await AutorizarTrabajoEnTareaAsync(id, cancellationToken);
             if (error is not null)
             {
                 return error;
@@ -238,7 +240,7 @@ namespace BoardyWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> QuitarEtiqueta(int id, int etiquetaId, CancellationToken cancellationToken)
         {
-            var (error, _) = await AutorizarTareaAsync(id, PoliticasTablero.ColaborarEnTablero, cancellationToken);
+            var (error, _) = await AutorizarTrabajoEnTareaAsync(id, cancellationToken);
             if (error is not null)
             {
                 return error;
@@ -274,6 +276,20 @@ namespace BoardyWeb.Controllers
 
             var resultado = await _tareaService.QuitarMiembroAsync(id, tableroMiembroId, cancellationToken);
             return Responder(resultado, IrATarea(id));
+        }
+
+        // Mover, cambiar estado y etiquetar: P y A en cualquier tarea; Operario solo en las que tiene asignadas.
+        private async Task<(IActionResult? Error, int TableroId)> AutorizarTrabajoEnTareaAsync(int tareaId, CancellationToken cancellationToken)
+        {
+            var tableroId = await _tareaService.ObtenerTableroIdAsync(tareaId, cancellationToken);
+
+            if (tableroId is null)
+            {
+                return (NotFound(), 0);
+            }
+
+            var permitido = await TienePermisoSobreTareaAsync(tareaId, PoliticasTarea.TrabajarEnTarea);
+            return (permitido ? null : Forbid(), tableroId.Value);
         }
 
         private async Task<(IActionResult? Error, int TableroId)> AutorizarTareaAsync(int tareaId, string politica, CancellationToken cancellationToken)
