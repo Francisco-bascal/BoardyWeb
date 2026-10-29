@@ -8,7 +8,7 @@ namespace BoardyWeb.Models
 
         public string Mensaje { get; set; } = string.Empty;
 
-        public string Estado { get; set; } = string.Empty;
+        public EstadoInvitacion Estado { get; set; } = EstadoInvitacion.Pendiente;
 
         public string UsuarioInvitadoId { get; set; } = null!;
 

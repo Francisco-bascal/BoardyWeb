@@ -66,6 +66,10 @@ namespace BoardyWeb.DTOs
     {
         [Range(1, int.MaxValue, ErrorMessage = "Debés seleccionar una lista.")]
         public int ListaTareaId { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "La posición debe ser mayor o igual a 1.")]
+        [Display(Name = "Posición")]
+        public int? NuevoOrden { get; set; }
     }
 
     public class CambiarEstadoTareaDto

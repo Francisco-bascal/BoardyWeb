@@ -128,7 +128,8 @@ namespace BoardyWeb.Migrations
 
                     b.Property<string>("Estado")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("FechaInvitacion")
                         .HasColumnType("datetime2");

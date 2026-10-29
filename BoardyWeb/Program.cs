@@ -1,6 +1,7 @@
 using BoardyWeb.Autorizacion;
 using BoardyWeb.Data;
 using BoardyWeb.Models;
+using BoardyWeb.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,16 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddScoped<IAuthorizationHandler, RolTableroHandler>();
+
+builder.Services.AddScoped<IEstadoTareaService, EstadoTareaService>();
+builder.Services.AddScoped<IRolMiembroService, RolMiembroService>();
+builder.Services.AddScoped<ITableroService, TableroService>();
+builder.Services.AddScoped<IMiembroTableroService, MiembroTableroService>();
+builder.Services.AddScoped<IInvitacionService, InvitacionService>();
+builder.Services.AddScoped<IListaTareaService, ListaTareaService>();
+builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
+builder.Services.AddScoped<ITareaService, TareaService>();
+builder.Services.AddScoped<IComentarioService, ComentarioService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddRazorPages();

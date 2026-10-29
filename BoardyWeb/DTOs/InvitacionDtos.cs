@@ -1,3 +1,4 @@
+using BoardyWeb.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace BoardyWeb.DTOs
@@ -16,7 +17,7 @@ namespace BoardyWeb.DTOs
 
         public string Mensaje { get; set; } = string.Empty;
 
-        public string Estado { get; set; } = string.Empty;
+        public EstadoInvitacion Estado { get; set; }
 
         public DateTime FechaInvitacion { get; set; }
     }

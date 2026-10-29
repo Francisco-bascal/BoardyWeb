@@ -103,6 +103,7 @@ namespace BoardyWeb.Data
             modelBuilder.Entity<InvitacionTablero>(entity =>
             {
                 entity.HasKey(i => i.InvitacionTableroId);
+                entity.Property(i => i.Estado).HasConversion<string>().HasMaxLength(50);
                 entity.HasOne(i => i.UsuarioInvitado).WithMany(u => u.InvitacionesRecibidas).HasForeignKey(i => i.UsuarioInvitadoId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(i => i.UsuarioInvitador).WithMany(u => u.InvitacionesEnviadas).HasForeignKey(i => i.UsuarioInvitadorId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(i => i.Tablero).WithMany(t => t.Invitaciones).HasForeignKey(i => i.TableroId).OnDelete(DeleteBehavior.Cascade);
