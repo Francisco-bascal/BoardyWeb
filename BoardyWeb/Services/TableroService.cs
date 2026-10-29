@@ -120,6 +120,73 @@ namespace BoardyWeb.Services
             return ResultadoOperacion.Exitoso("Tablero eliminado correctamente.");
         }
 
+        public async Task<ResultadoOperacion> TransferirPropiedadAsync(int tableroId, int tableroMiembroDestinoId, string usuarioActualId, CancellationToken cancellationToken = default)
+        {
+            var tablero = await _context.Tableros.FirstOrDefaultAsync(t => t.TableroId == tableroId, cancellationToken);
+
+            if (tablero is null)
+            {
+                return ResultadoOperacion.NoExiste("El tablero no existe.");
+            }
+
+            if (tablero.PropietarioId != usuarioActualId)
+            {
+                return ResultadoOperacion.Prohibido("Solo el propietario puede transferir la propiedad del tablero.");
+            }
+
+            var destino = await _context.TableroMiembros
+                .Include(m => m.Roles).ThenInclude(r => r.RolMiembro)
+                .FirstOrDefaultAsync(m => m.TableroMiembroId == tableroMiembroDestinoId && m.TableroId == tableroId, cancellationToken);
+
+            if (destino is null)
+            {
+                return ResultadoOperacion.NoExiste("El miembro no pertenece al tablero.");
+            }
+
+            if (destino.UsuarioId == tablero.PropietarioId)
+            {
+                return ResultadoOperacion.Fallo("Ese usuario ya es el propietario del tablero.");
+            }
+
+            if (!destino.Roles.Any(r => r.RolMiembro.Nombre == RolesTablero.Administrador))
+            {
+                return ResultadoOperacion.Fallo("Solo se puede transferir la propiedad a un miembro con el rol Administrador.");
+            }
+
+            var rolPropietario = await _context.RolMiembros.FirstOrDefaultAsync(r => r.Nombre == RolesTablero.Propietario, cancellationToken);
+            var rolAdministrador = await _context.RolMiembros.FirstOrDefaultAsync(r => r.Nombre == RolesTablero.Administrador, cancellationToken);
+
+            if (rolPropietario is null || rolAdministrador is null)
+            {
+                return ResultadoOperacion.Fallo("No están configurados los roles Propietario y Administrador.");
+            }
+
+            var actual = await _context.TableroMiembros
+                .Include(m => m.Roles)
+                .FirstAsync(m => m.TableroId == tableroId && m.UsuarioId == usuarioActualId, cancellationToken);
+
+            var ahora = DateTime.UtcNow;
+
+            // Todo se persiste en un único SaveChanges: nunca queda un tablero sin propietario.
+            tablero.PropietarioId = destino.UsuarioId;
+            destino.Roles.Add(new MiembrosPorRol { RolMiembroId = rolPropietario.RolMiembroId, FechaAsignacion = ahora });
+
+            var asignacionPropietario = actual.Roles.FirstOrDefault(r => r.RolMiembroId == rolPropietario.RolMiembroId);
+            if (asignacionPropietario is not null)
+            {
+                _context.MiembrosPorRol.Remove(asignacionPropietario);
+            }
+
+            if (!actual.Roles.Any(r => r.RolMiembroId == rolAdministrador.RolMiembroId))
+            {
+                actual.Roles.Add(new MiembrosPorRol { RolMiembroId = rolAdministrador.RolMiembroId, FechaAsignacion = ahora });
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return ResultadoOperacion.Exitoso("La propiedad del tablero fue transferida. Ahora tenés el rol Administrador.");
+        }
+
         private static TableroDto Mapear(Tablero tablero) => new()
         {
             TableroId = tablero.TableroId,

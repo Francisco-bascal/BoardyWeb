@@ -11,12 +11,15 @@ namespace BoardyWeb.Controllers
     {
         private readonly IMiembroTableroService _miembroService;
         private readonly IRolMiembroService _rolMiembroService;
+        private readonly ITableroService _tableroService;
 
         public MiembrosController(
             IMiembroTableroService miembroService,
             IRolMiembroService rolMiembroService,
+            ITableroService tableroService,
             IAuthorizationService autorizacion) : base(autorizacion)
         {
+            _tableroService = tableroService;
             _miembroService = miembroService;
             _rolMiembroService = rolMiembroService;
         }
@@ -29,10 +32,14 @@ namespace BoardyWeb.Controllers
                 return acceso;
             }
 
-            var roles = await _rolMiembroService.ListarAsync(cancellationToken);
+            // El rol Propietario no se asigna desde los selectores: solo se obtiene transfiriendo la propiedad.
+            var roles = (await _rolMiembroService.ListarAsync(cancellationToken))
+                .Where(r => r.Nombre != RolesTablero.Propietario)
+                .ToList();
             ViewData["TableroId"] = tableroId;
             ViewData["Roles"] = new SelectList(roles, nameof(RolMiembroDto.RolMiembroId), nameof(RolMiembroDto.Nombre));
             ViewData["PuedeAdministrar"] = await TienePermisoAsync(tableroId, PoliticasTablero.AdministrarTablero);
+            ViewData["PuedeGestionar"] = await TienePermisoAsync(tableroId, PoliticasTablero.GestionarTablero);
 
             return Vista("_Lista", await _miembroService.ListarAsync(tableroId, cancellationToken));
         }
@@ -100,6 +107,20 @@ namespace BoardyWeb.Controllers
             }
 
             var resultado = await _miembroService.QuitarAsync(tableroId, tableroMiembroId, cancellationToken);
+            return Responder(resultado, VolverAIndex(tableroId));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TransferirPropiedad(int tableroId, int tableroMiembroId, CancellationToken cancellationToken)
+        {
+            var acceso = await ValidarAccesoAsync(tableroId, PoliticasTablero.GestionarTablero);
+            if (acceso is not null)
+            {
+                return acceso;
+            }
+
+            var resultado = await _tableroService.TransferirPropiedadAsync(tableroId, tableroMiembroId, UsuarioId, cancellationToken);
             return Responder(resultado, VolverAIndex(tableroId));
         }
 

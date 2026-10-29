@@ -1,34 +1,74 @@
 // Arrastrar y soltar del tablero kanban (SortableJS).
 //   - Tarjetas: entre listas y dentro de una lista  -> Tareas/Mover
 //   - Columnas: reordenar las listas del tablero    -> ListasTarea/Reordenar
-// La tarjeta queda donde se suelta; tras la respuesta se vuelven a pedir las regiones, lo que
-// resincroniza contadores y orden y, si el servidor rechazó el cambio, restaura el estado real.
+//
+// El arrastre nunca se bloquea: cada movimiento queda donde se soltó y se envía al servidor
+// en una cola (en orden). El tablero solo se vuelve a pedir cuando algo falló o cuando la cola
+// quedó vacía y no hay un arrastre en curso, para corregir cualquier desfase de orden.
 (function ($) {
     'use strict';
 
+    const ESPERA_RESINCRONIZACION_MS = 1000;
+
     let instancias = [];
+    let cola = Promise.resolve();
+    let pendientes = 0;
+    let huboError = false;
+    let temporizador = null;
 
     function destruir() {
         instancias.forEach(function (instancia) { instancia.destroy(); });
         instancias = [];
     }
 
-    function bloquear(bloqueado) {
-        instancias.forEach(function (instancia) { instancia.option('disabled', bloqueado); });
+    function actualizarContadores() {
+        $('.kanban-columna').each(function () {
+            $(this).find('.kanban-columna-titulo .chip').text($(this).find('.kanban-tarjeta').length);
+        });
     }
 
-    function enviar(url, parametros) {
-        bloquear(true);
+    function hayArrastreEnCurso() {
+        return typeof Sortable !== 'undefined' && Sortable.active !== null && Sortable.active !== undefined;
+    }
 
-        return $.ajax({
-            url: url + '?' + $.param(parametros),
-            type: 'POST',
-            headers: { 'RequestVerificationToken': window.ajaxCrud.token() }
-        })
-            .fail(window.ajaxCrud.errorAjax)
-            .always(function () {
-                window.ajaxCrud.refrescarRegiones().always(function () { bloquear(false); });
+    function programarResincronizacion() {
+        clearTimeout(temporizador);
+        temporizador = setTimeout(intentarResincronizar, huboError ? 0 : ESPERA_RESINCRONIZACION_MS);
+    }
+
+    function intentarResincronizar() {
+        if (pendientes > 0 || hayArrastreEnCurso()) {
+            temporizador = setTimeout(intentarResincronizar, 400);
+            return;
+        }
+
+        huboError = false;
+        window.ajaxCrud.refrescarRegiones();
+    }
+
+    function encolar(url, parametros) {
+        pendientes++;
+
+        cola = cola.then(function () {
+            return new Promise(function (resolver) {
+                $.ajax({
+                    url: url + '?' + $.param(parametros),
+                    type: 'POST',
+                    headers: { 'RequestVerificationToken': window.ajaxCrud.token() }
+                })
+                    .done(function () { resolver(true); })
+                    .fail(function (xhr) {
+                        window.ajaxCrud.errorAjax(xhr);
+                        resolver(false);
+                    });
             });
+        }).then(function (correcto) {
+            pendientes--;
+            if (!correcto) {
+                huboError = true;
+            }
+            programarResincronizacion();
+        });
     }
 
     function alSoltarTarea(evento) {
@@ -39,7 +79,8 @@
             return;
         }
 
-        enviar($(evento.item).data('url-mover'), {
+        actualizarContadores();
+        encolar($(evento.item).data('url-mover'), {
             ListaTareaId: listaDestino,
             NuevoOrden: evento.newIndex + 1
         });
@@ -50,7 +91,7 @@
             return;
         }
 
-        enviar($(evento.item).data('url-reordenar'), { NuevoOrden: evento.newIndex + 1 });
+        encolar($(evento.item).data('url-reordenar'), { NuevoOrden: evento.newIndex + 1 });
     }
 
     function inicializar() {

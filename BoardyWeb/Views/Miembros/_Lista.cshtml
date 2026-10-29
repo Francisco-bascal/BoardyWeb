@@ -3,6 +3,7 @@
     var tableroId = ViewData["TableroId"];
     var roles = ViewData["Roles"] as SelectList;
     var puedeAdministrar = ViewData["PuedeAdministrar"] is true;
+    var puedeGestionar = ViewData["PuedeGestionar"] is true;
 
     string Iniciales(string nombre)
     {
@@ -50,6 +51,12 @@
                             }
                         </td>
                         <td class="text-end">
+                            @if (puedeGestionar && !miembro.EsPropietario && miembro.Roles.Any(r => r.Nombre == RolesTablero.Administrador))
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1"
+                                        data-accion-url="@Url.Action("TransferirPropiedad", "Miembros", new { tableroId, tableroMiembroId = miembro.TableroMiembroId })"
+                                        data-confirmar="¿Transferir la propiedad del tablero a @miembro.NombreCompleto? Pasarás a ser Administrador."><i class="bi bi-key me-1"></i>Transferir propiedad</button>
+                            }
                             @if (editable)
                             {
                                 <div class="d-inline-flex gap-1 align-items-center">

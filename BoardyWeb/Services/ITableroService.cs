@@ -14,5 +14,11 @@ namespace BoardyWeb.Services
         Task<ResultadoOperacion<TableroDto>> ActualizarAsync(int tableroId, ActualizarTableroDto dto, CancellationToken cancellationToken = default);
 
         Task<ResultadoOperacion> EliminarAsync(int tableroId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Transfiere la propiedad del tablero a otro miembro que tenga el rol Administrador.
+        /// Solo puede hacerlo el propietario actual, que pasa a ser Administrador.
+        /// </summary>
+        Task<ResultadoOperacion> TransferirPropiedadAsync(int tableroId, int tableroMiembroDestinoId, string usuarioActualId, CancellationToken cancellationToken = default);
     }
 }

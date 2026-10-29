@@ -39,6 +39,22 @@ window.iniciarMenusDelTablero = function () {
     });
 };
 
+// Mientras un menú está abierto, su tarjeta/columna se eleva sobre las demás (clase .menu-abierto)
+// para que las tarjetas de abajo no lo tapen.
+document.addEventListener('show.bs.dropdown', function (e) {
+    const contenedor = e.target.closest('.tarjeta-tarea, .kanban-columna');
+    if (contenedor) {
+        contenedor.classList.add('menu-abierto');
+    }
+});
+
+document.addEventListener('hidden.bs.dropdown', function (e) {
+    const contenedor = e.target.closest('.tarjeta-tarea, .kanban-columna');
+    if (contenedor) {
+        contenedor.classList.remove('menu-abierto');
+    }
+});
+
 document.addEventListener('DOMContentLoaded', window.iniciarMenusDelTablero);
 $(document).on('regionRefrescada', window.iniciarMenusDelTablero);
 

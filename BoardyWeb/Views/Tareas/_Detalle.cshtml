@@ -40,7 +40,16 @@
                 }
             </dd>
             <dt class="col-sm-3">Vencimiento</dt>
-            <dd class="col-sm-9">@(tarea.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "Sin fecha")</dd>
+            <dd class="col-sm-9">
+                @if (tarea.FechaVencimiento.HasValue)
+                {
+                    <partial name="_ChipVencimiento" model="tarea" view-data="@(new ViewDataDictionary(ViewData) { { "Completo", true } })" />
+                }
+                else
+                {
+                    <span class="text-suave">Sin fecha</span>
+                }
+            </dd>
             <dt class="col-sm-3">Etiquetas</dt>
             <dd class="col-sm-9">
                 @foreach (var etiqueta in tarea.Etiquetas)

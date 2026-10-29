@@ -318,10 +318,41 @@ a {
   white-space: nowrap;
 }
 
-.chip-vencida {
-  color: var(--prioridad-urgente);
-  border-color: currentColor;
-  background-color: transparent;
+/* Semáforo de vencimiento: vencida (negro), hoy (rojo), hasta 3 días (amarillo), más de 3 días (verde). */
+.chip-vencimiento {
+  font-weight: 600;
+  border-color: transparent;
+}
+
+.chip-vencimiento-vencida {
+  color: #fff;
+  background-color: #111827;
+}
+
+.chip-vencimiento-hoy {
+  color: #fff;
+  background-color: #dc2626;
+}
+
+.chip-vencimiento-proxima {
+  color: #1f2937;
+  background-color: #facc15;
+}
+
+.chip-vencimiento-holgada {
+  color: #fff;
+  background-color: #15803d;
+}
+
+[data-bs-theme="dark"] .chip-vencimiento-vencida {
+  color: #f3f4f6;
+  background-color: #000;
+  border-color: #6b7280;
+}
+
+[data-bs-theme="dark"] .chip-vencimiento-holgada {
+  color: #052e16;
+  background-color: #4ade80;
 }
 
 .chip-prioridad {
@@ -744,6 +775,16 @@ a {
   transform: translateY(-2px);
   border-color: var(--boardy-acento-borde);
   box-shadow: inset 4px 0 0 var(--prioridad-color, var(--boardy-borde)), var(--boardy-sombra-md);
+}
+
+/* Con un menú abierto, la tarjeta/columna se eleva sobre las demás y pierde el transform:
+   un ancestro con transform haría que el menú "fixed" se posicione respecto de la tarjeta. */
+.tarjeta-tarea.menu-abierto,
+.tarjeta-tarea.menu-abierto:hover,
+.kanban-columna.menu-abierto {
+  z-index: 30;
+  transform: none;
+  transition: none;
 }
 
 .kanban[data-puede-colaborar="true"] .tarjeta-tarea {

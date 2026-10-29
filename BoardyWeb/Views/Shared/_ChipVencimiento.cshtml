@@ -1,0 +1,22 @@
+@using BoardyWeb.Comun
+@model TareaDto
+@{
+    if (!Model.FechaVencimiento.HasValue)
+    {
+        return;
+    }
+
+    var finalizada = Model.EstadoNombre == VencimientoTarea.NombreEstadoFinalizado;
+    var (estado, descripcion) = VencimientoTarea.Calcular(Model.FechaVencimiento.Value, finalizada);
+    var formato = ViewData["Completo"] is true ? "dd/MM/yyyy" : "dd/MM";
+    var icono = estado switch
+    {
+        EstadoVencimiento.Vencida => "calendar-x",
+        EstadoVencimiento.Hoy => "exclamation-circle",
+        _ => "calendar-event"
+    };
+}
+
+<span class="chip chip-vencimiento chip-vencimiento-@estado.ToString().ToLowerInvariant()" title="@descripcion">
+    <i class="bi bi-@icono"></i> @Model.FechaVencimiento.Value.ToString(formato)
+</span>
