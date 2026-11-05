@@ -4,7 +4,7 @@
 }
 
 <div class="mb-3">
-    <a asp-controller="Tableros" asp-action="Detalle" asp-route-id="@Model.Tarea.TableroId">&larr; Volver al tablero @Model.Tarea.TableroNombre</a>
+    <a asp-controller="Tableros" asp-action="Detalle" asp-route-id="@Model.Tarea.TableroId" class="btn btn-sm btn-outline-secondary mb-2"><i class="bi bi-arrow-left me-1"></i>Volver al tablero @Model.Tarea.TableroNombre</a>
 </div>
 
 <div class="modal-content mx-auto" style="max-width: 48rem;">

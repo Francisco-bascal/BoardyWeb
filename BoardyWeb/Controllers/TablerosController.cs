@@ -29,7 +29,7 @@ namespace BoardyWeb.Controllers
             return Vista("_Lista", await _tableroService.ListarDelUsuarioAsync(UsuarioId, cancellationToken));
         }
 
-        public async Task<IActionResult> Detalle(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Detalle(int id, int? tarea, CancellationToken cancellationToken)
         {
             var acceso = await ValidarAccesoAsync(id, PoliticasTablero.VerTablero);
             if (acceso is not null)
@@ -55,6 +55,7 @@ namespace BoardyWeb.Controllers
                 PuedeGestionar = await TienePermisoAsync(id, PoliticasTablero.GestionarTablero)
             };
 
+            ViewData["AbrirTarea"] = tarea;
             return Vista("_Kanban", modelo);
         }
 

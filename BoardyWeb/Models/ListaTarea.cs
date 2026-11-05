@@ -18,6 +18,11 @@ namespace BoardyWeb.Models
         [Display(Name = "Orden")]
         public int Orden { get; set; }
 
+        /// <summary>Estado de las tareas de la lista. Solo se usa en tableros Kanban.</summary>
+        public int? EstadoTareaId { get; set; }
+
+        public EstadoTarea? EstadoTarea { get; set; }
+
         public int TableroId { get; set; }
 
         public Tablero Tablero { get; set; } = null!;

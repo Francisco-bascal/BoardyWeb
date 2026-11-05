@@ -43,13 +43,19 @@ namespace BoardyWeb.Services
                     Nombre = t.Nombre,
                     Descripcion = t.Descripcion,
                     PropietarioNombre = t.Propietario.Nombre + " " + t.Propietario.Apellido,
-                    EsPropietario = t.PropietarioId == usuarioId
+                    EsPropietario = t.PropietarioId == usuarioId,
+                    EsKanban = t.EsKanban == true
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
             return tablero is null
                 ? ResultadoOperacion<TableroDetalleDto>.NoExiste("El tablero no existe.")
                 : ResultadoOperacion<TableroDetalleDto>.Exitoso(tablero);
+        }
+
+        public async Task<bool> EsKanbanAsync(int tableroId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Tableros.AnyAsync(t => t.TableroId == tableroId && t.EsKanban == true, cancellationToken);
         }
 
         public async Task<ResultadoOperacion<TableroDto>> CrearAsync(CrearTableroDto dto, string usuarioId, CancellationToken cancellationToken = default)
@@ -69,8 +75,27 @@ namespace BoardyWeb.Services
             {
                 Nombre = dto.Nombre.Trim(),
                 Descripcion = dto.Descripcion.Trim(),
-                PropietarioId = usuarioId
+                PropietarioId = usuarioId,
+                EsKanban = dto.EsKanban
             };
+
+            if (dto.EsKanban)
+            {
+                var estados = await _context.EstadoTareas
+                    .Where(e => EstadosTareaSistema.Todos.Contains(e.Nombre))
+                    .ToDictionaryAsync(e => e.Nombre, e => e.EstadoTareaId, cancellationToken);
+
+                if (estados.Count != EstadosTareaSistema.Todos.Length)
+                {
+                    return ResultadoOperacion<TableroDto>.Fallo("No están configurados los estados de tarea de Kanban.");
+                }
+
+                var orden = 1;
+                foreach (var nombre in EstadosTareaSistema.Todos)
+                {
+                    tablero.ListasTarea.Add(new ListaTarea { Nombre = nombre, Orden = orden++, EstadoTareaId = estados[nombre] });
+                }
+            }
 
             tablero.Miembros.Add(new TableroMiembro
             {

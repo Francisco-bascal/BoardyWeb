@@ -56,6 +56,12 @@ builder.Services.AddScoped<IListaTareaService, ListaTareaService>();
 builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
 builder.Services.AddScoped<ITareaService, TareaService>();
 builder.Services.AddScoped<IComentarioService, ComentarioService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
+builder.Services.AddScoped<IRegistroErrorService, RegistroErrorService>();
+
+// Desactivar a un usuario o cambiar su rol global cierra sus sesiones en, como mucho, un minuto.
+builder.Services.Configure<SecurityStampValidatorOptions>(options => options.ValidationInterval = TimeSpan.FromMinutes(1));
 
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 

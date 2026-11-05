@@ -173,6 +173,9 @@ namespace BoardyWeb.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<int?>("EstadoTareaId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime2");
 
@@ -197,6 +200,8 @@ namespace BoardyWeb.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ListaTareaId");
+
+                    b.HasIndex("EstadoTareaId");
 
                     b.HasIndex("TableroId");
 
@@ -228,6 +233,70 @@ namespace BoardyWeb.Migrations
                         .IsUnique();
 
                     b.ToTable("MiembrosPorRol");
+                });
+
+            modelBuilder.Entity("BoardyWeb.Models.RegistroAuditoria", b =>
+                {
+                    b.Property<int>("RegistroAuditoriaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RegistroAuditoriaId"));
+
+                    b.Property<string>("Accion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TableroId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("RegistroAuditoriaId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("TableroId", "Fecha");
+
+                    b.ToTable("RegistrosAuditoria");
+                });
+
+            modelBuilder.Entity("BoardyWeb.Models.RegistroError", b =>
+                {
+                    b.Property<int>("RegistroErrorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RegistroErrorId"));
+
+                    b.Property<string>("Detalle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Mensaje")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Ruta")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsuarioId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RegistroErrorId");
+
+                    b.HasIndex("Fecha");
+
+                    b.ToTable("RegistrosError");
                 });
 
             modelBuilder.Entity("BoardyWeb.Models.RolMiembro", b =>
@@ -266,6 +335,9 @@ namespace BoardyWeb.Migrations
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool?>("EsKanban")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime2");
@@ -710,11 +782,18 @@ namespace BoardyWeb.Migrations
 
             modelBuilder.Entity("BoardyWeb.Models.ListaTarea", b =>
                 {
+                    b.HasOne("BoardyWeb.Models.EstadoTarea", "EstadoTarea")
+                        .WithMany("Listas")
+                        .HasForeignKey("EstadoTareaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("BoardyWeb.Models.Tablero", "Tablero")
                         .WithMany("ListasTarea")
                         .HasForeignKey("TableroId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("EstadoTarea");
 
                     b.Navigation("Tablero");
                 });
@@ -736,6 +815,25 @@ namespace BoardyWeb.Migrations
                     b.Navigation("RolMiembro");
 
                     b.Navigation("TableroMiembro");
+                });
+
+            modelBuilder.Entity("BoardyWeb.Models.RegistroAuditoria", b =>
+                {
+                    b.HasOne("BoardyWeb.Models.Tablero", "Tablero")
+                        .WithMany()
+                        .HasForeignKey("TableroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BoardyWeb.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tablero");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("BoardyWeb.Models.Tablero", b =>
@@ -878,6 +976,8 @@ namespace BoardyWeb.Migrations
 
             modelBuilder.Entity("BoardyWeb.Models.EstadoTarea", b =>
                 {
+                    b.Navigation("Listas");
+
                     b.Navigation("Tareas");
                 });
 

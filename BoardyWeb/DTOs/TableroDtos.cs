@@ -24,6 +24,8 @@ namespace BoardyWeb.DTOs
         public string PropietarioNombre { get; set; } = string.Empty;
 
         public bool EsPropietario { get; set; }
+
+        public bool EsKanban { get; set; }
     }
 
     public class CrearTableroDto
@@ -36,6 +38,10 @@ namespace BoardyWeb.DTOs
         [StringLength(1000, ErrorMessage = "La descripción no puede superar los {1} caracteres.")]
         [Display(Name = "Descripción")]
         public string Descripcion { get; set; } = string.Empty;
+
+        // Solo se usa al crear: el esquema no cambia después.
+        [Display(Name = "Esquema")]
+        public bool EsKanban { get; set; } = true;
     }
 
     public class ActualizarTableroDto : CrearTableroDto

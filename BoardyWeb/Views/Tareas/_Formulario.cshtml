@@ -28,13 +28,20 @@
                 <select asp-for="Prioridad" class="form-select" asp-items="Html.GetEnumSelectList<PrioridadTarea>()"></select>
                 <span asp-validation-for="Prioridad" class="text-danger"></span>
             </div>
-            <div class="col-md-4 mb-3">
-                <label asp-for="EstadoTareaId" class="form-label"></label>
-                <select asp-for="EstadoTareaId" class="form-select" asp-items="estados">
-                    <option value="">Seleccioná un estado</option>
-                </select>
-                <span asp-validation-for="EstadoTareaId" class="text-danger"></span>
-            </div>
+            @if (ViewData["EstadoFijo"] is int estadoFijo)
+            {
+                <input type="hidden" name="EstadoTareaId" value="@estadoFijo" />
+            }
+            else
+            {
+                <div class="col-md-4 mb-3">
+                    <label asp-for="EstadoTareaId" class="form-label"></label>
+                    <select asp-for="EstadoTareaId" class="form-select" asp-items="estados">
+                        <option value="">Seleccioná un estado</option>
+                    </select>
+                    <span asp-validation-for="EstadoTareaId" class="text-danger"></span>
+                </div>
+            }
             <div class="col-md-4 mb-3">
                 <label asp-for="FechaVencimiento" class="form-label"></label>
                 <input asp-for="FechaVencimiento" class="form-control" min="2000-01-01" max="2100-12-31" />

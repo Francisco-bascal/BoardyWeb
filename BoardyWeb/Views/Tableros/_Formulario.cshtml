@@ -21,6 +21,21 @@
             <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
             <span asp-validation-for="Descripcion" class="text-danger"></span>
         </div>
+        @if (!editando)
+        {
+            <div class="mb-3">
+                <label class="form-label d-block">Esquema de organización</label>
+                <div class="form-check">
+                    <input asp-for="EsKanban" type="radio" value="true" id="esquemaKanban" class="form-check-input" />
+                    <label class="form-check-label" for="esquemaKanban"><strong>Kanban clásico</strong>: arranca con Pendiente, En progreso y Finalizada; mover una tarea cambia su estado.</label>
+                </div>
+                <div class="form-check">
+                    <input asp-for="EsKanban" type="radio" value="false" id="esquemaLibre" class="form-check-input" />
+                    <label class="form-check-label" for="esquemaLibre"><strong>Esquema libre</strong>: creás las listas que quieras, sin relación con el estado de las tareas.</label>
+                </div>
+                <div class="form-text">No se puede cambiar después.</div>
+            </div>
+        }
     </div>
     <div class="modal-footer">
         <a asp-action="Index" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</a>

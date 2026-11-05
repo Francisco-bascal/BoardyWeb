@@ -1,0 +1,41 @@
+@model IReadOnlyList<TareaDto>
+@{
+    ViewData["Title"] = "Mi panel";
+}
+
+<div class="pagina-encabezado">
+    <h1>Mi panel</h1>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="estado-vacio">
+        <i class="bi bi-check2-circle"></i>
+        <strong>No tenés tareas abiertas asignadas</strong>
+        <span>Cuando te asignen una tarea en un tablero, la vas a ver acá.</span>
+    </div>
+}
+
+@foreach (var grupo in Model.GroupBy(t => new { t.TableroId, t.TableroNombre }))
+{
+    <section class="mb-4">
+        <h2 class="h5 mb-3">
+            <a asp-controller="Tableros" asp-action="Detalle" asp-route-id="@grupo.Key.TableroId" class="text-body text-decoration-none"><i class="bi bi-kanban me-2"></i>@grupo.Key.TableroNombre</a>
+            <span class="chip ms-1">@grupo.Count()</span>
+        </h2>
+        <div class="d-grid gap-2">
+            @foreach (var tarea in grupo)
+            {
+                <div class="tarjeta-tarea prioridad-@tarea.Prioridad.ToString().ToLowerInvariant() d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <a asp-controller="Tableros" asp-action="Detalle" asp-route-id="@tarea.TableroId" asp-route-tarea="@tarea.TareaId" class="titulo stretched-link">@tarea.Titulo</a>
+                    <div class="d-flex flex-wrap gap-1">
+                        <span class="chip"><i class="bi bi-layout-three-columns"></i> @tarea.ListaNombre</span>
+                        <span class="chip"><i class="bi bi-circle-half"></i> @tarea.EstadoNombre</span>
+                        <span class="chip chip-prioridad">@tarea.Prioridad</span>
+                        <partial name="_ChipVencimiento" model="tarea" />
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}

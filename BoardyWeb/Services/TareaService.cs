@@ -27,6 +27,19 @@ namespace BoardyWeb.Services
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<IReadOnlyList<TareaDto>> ListarAsignadasAsync(string usuarioId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Tareas
+                .AsNoTracking()
+                .Where(t => t.MiembrosAsignados.Any(m => m.TableroMiembro.UsuarioId == usuarioId)
+                    && t.EstadoTarea.Nombre != EstadosTareaSistema.Finalizada)
+                .OrderBy(t => t.ListaTarea.Tablero.Nombre)
+                .ThenBy(t => t.FechaVencimiento == null)
+                .ThenBy(t => t.FechaVencimiento)
+                .Select(Proyectar())
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<ResultadoOperacion<TareaDto>> ObtenerAsync(int tareaId, CancellationToken cancellationToken = default)
         {
             var tarea = await ConsultarDto(tareaId, cancellationToken);
@@ -47,12 +60,20 @@ namespace BoardyWeb.Services
 
         public async Task<ResultadoOperacion<TareaDto>> CrearAsync(int listaTareaId, CrearTareaDto dto, CancellationToken cancellationToken = default)
         {
-            if (!await _context.ListaTareas.AnyAsync(l => l.ListaTareaId == listaTareaId, cancellationToken))
+            var lista = await _context.ListaTareas
+                .Where(l => l.ListaTareaId == listaTareaId)
+                .Select(l => new { l.EstadoTareaId })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (lista is null)
             {
                 return ResultadoOperacion<TareaDto>.NoExiste("La lista no existe.");
             }
 
-            if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == dto.EstadoTareaId, cancellationToken))
+            // Si la lista tiene estado (Kanban) manda la lista, no el formulario.
+            var estadoTareaId = lista.EstadoTareaId ?? dto.EstadoTareaId;
+
+            if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == estadoTareaId, cancellationToken))
             {
                 return ResultadoOperacion<TareaDto>.Fallo(nameof(dto.EstadoTareaId), "El estado seleccionado no existe.");
             }
@@ -68,7 +89,7 @@ namespace BoardyWeb.Services
                 Descripcion = dto.Descripcion.Trim(),
                 FechaVencimiento = dto.FechaVencimiento,
                 Prioridad = dto.Prioridad,
-                EstadoTareaId = dto.EstadoTareaId,
+                EstadoTareaId = estadoTareaId,
                 Orden = ultimoOrden + 1
             };
 
@@ -80,14 +101,18 @@ namespace BoardyWeb.Services
 
         public async Task<ResultadoOperacion<TareaDto>> ActualizarAsync(int tareaId, ActualizarTareaDto dto, CancellationToken cancellationToken = default)
         {
-            var tarea = await _context.Tareas.FirstOrDefaultAsync(t => t.TareaId == tareaId, cancellationToken);
+            var tarea = await _context.Tareas
+                .Include(t => t.ListaTarea)
+                .FirstOrDefaultAsync(t => t.TareaId == tareaId, cancellationToken);
 
             if (tarea is null)
             {
                 return ResultadoOperacion<TareaDto>.NoExiste("La tarea no existe.");
             }
 
-            if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == dto.EstadoTareaId, cancellationToken))
+            var estadoTareaId = tarea.ListaTarea.EstadoTareaId ?? dto.EstadoTareaId;
+
+            if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == estadoTareaId, cancellationToken))
             {
                 return ResultadoOperacion<TareaDto>.Fallo(nameof(dto.EstadoTareaId), "El estado seleccionado no existe.");
             }
@@ -96,7 +121,7 @@ namespace BoardyWeb.Services
             tarea.Descripcion = dto.Descripcion.Trim();
             tarea.FechaVencimiento = dto.FechaVencimiento;
             tarea.Prioridad = dto.Prioridad;
-            tarea.EstadoTareaId = dto.EstadoTareaId;
+            tarea.EstadoTareaId = estadoTareaId;
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion<TareaDto>.Exitoso((await ConsultarDto(tareaId, cancellationToken))!, "Tarea actualizada correctamente.");
@@ -137,6 +162,7 @@ namespace BoardyWeb.Services
             var posicion = Math.Min(dto.NuevoOrden ?? tareasDestino.Count + 1, tareasDestino.Count + 1);
             tareasDestino.Insert(posicion - 1, tarea);
             tarea.ListaTareaId = dto.ListaTareaId;
+            tarea.EstadoTareaId = listaDestino.EstadoTareaId ?? tarea.EstadoTareaId;
             Renumerar(tareasDestino);
 
             if (listaOrigenId != dto.ListaTareaId)
@@ -156,11 +182,27 @@ namespace BoardyWeb.Services
 
         public async Task<ResultadoOperacion<TareaDto>> CambiarEstadoAsync(int tareaId, CambiarEstadoTareaDto dto, CancellationToken cancellationToken = default)
         {
-            var tarea = await _context.Tareas.FirstOrDefaultAsync(t => t.TareaId == tareaId, cancellationToken);
+            var tarea = await _context.Tareas
+                .Include(t => t.ListaTarea)
+                .FirstOrDefaultAsync(t => t.TareaId == tareaId, cancellationToken);
 
             if (tarea is null)
             {
                 return ResultadoOperacion<TareaDto>.NoExiste("La tarea no existe.");
+            }
+
+            // En Kanban cambiar el estado es mover la tarea a una lista con ese estado.
+            if (tarea.ListaTarea.EstadoTareaId is not null)
+            {
+                var listaDestinoId = await _context.ListaTareas
+                    .Where(l => l.TableroId == tarea.ListaTarea.TableroId && l.EstadoTareaId == dto.EstadoTareaId)
+                    .OrderBy(l => l.Orden)
+                    .Select(l => (int?)l.ListaTareaId)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                return listaDestinoId is null
+                    ? ResultadoOperacion<TareaDto>.Fallo(nameof(dto.EstadoTareaId), "El tablero no tiene una lista con ese estado.")
+                    : await MoverAsync(tareaId, new MoverTareaDto { ListaTareaId = listaDestinoId.Value }, cancellationToken);
             }
 
             if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == dto.EstadoTareaId, cancellationToken))

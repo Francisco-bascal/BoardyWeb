@@ -1,0 +1,12 @@
+@model IReadOnlyList<UsuarioAdministracionDto>
+@{
+    ViewData["Title"] = "Plataforma";
+}
+
+<partial name="_PestanasPlataforma" />
+
+<div class="pagina-encabezado">
+    <h1>Usuarios</h1>
+</div>
+
+<partial name="_ListaUsuarios" model="Model" />

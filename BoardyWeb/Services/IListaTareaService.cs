@@ -9,6 +9,8 @@ namespace BoardyWeb.Services
 
         Task<int?> ObtenerTableroIdAsync(int listaTareaId, CancellationToken cancellationToken = default);
 
+        Task<int?> ObtenerEstadoAsync(int listaTareaId, CancellationToken cancellationToken = default);
+
         Task<ResultadoOperacion<ListaTareaDto>> CrearAsync(int tableroId, CrearListaTareaDto dto, CancellationToken cancellationToken = default);
 
         Task<ResultadoOperacion<ListaTareaDto>> ActualizarAsync(int listaTareaId, ActualizarListaTareaDto dto, CancellationToken cancellationToken = default);

@@ -150,7 +150,8 @@ namespace BoardyWeb.Data
             {
                 Nombre = "Tablero de ejemplo",
                 Descripcion = "Tablero de demostración con listas y tareas de muestra.",
-                PropietarioId = administrador.Id
+                PropietarioId = administrador.Id,
+                EsKanban = true
             };
 
             tablero.Miembros.Add(new TableroMiembro
@@ -167,9 +168,9 @@ namespace BoardyWeb.Data
                 }
             });
 
-            var listaPendiente = new ListaTarea { Nombre = "Pendiente", Orden = 1 };
-            var listaEnProgreso = new ListaTarea { Nombre = "En progreso", Orden = 2 };
-            var listaFinalizada = new ListaTarea { Nombre = "Finalizada", Orden = 3 };
+            var listaPendiente = new ListaTarea { Nombre = "Pendiente", Orden = 1, EstadoTareaId = estados[0].EstadoTareaId };
+            var listaEnProgreso = new ListaTarea { Nombre = "En progreso", Orden = 2, EstadoTareaId = estados[1].EstadoTareaId };
+            var listaFinalizada = new ListaTarea { Nombre = "Finalizada", Orden = 3, EstadoTareaId = estados[3].EstadoTareaId };
 
             listaPendiente.Tareas.Add(new Tarea
             {

@@ -13,6 +13,10 @@ namespace BoardyWeb.DTOs
         public int Orden { get; set; }
 
         public int TableroId { get; set; }
+
+        public int? EstadoTareaId { get; set; }
+
+        public string EstadoNombre { get; set; } = string.Empty;
     }
 
     public class CrearListaTareaDto
@@ -25,6 +29,9 @@ namespace BoardyWeb.DTOs
         [StringLength(1000, ErrorMessage = "La descripción no puede superar los {1} caracteres.")]
         [Display(Name = "Descripción")]
         public string Descripcion { get; set; } = string.Empty;
+
+        [Display(Name = "Estado de las tareas")]
+        public int? EstadoTareaId { get; set; }
     }
 
     public class ActualizarListaTareaDto : CrearListaTareaDto

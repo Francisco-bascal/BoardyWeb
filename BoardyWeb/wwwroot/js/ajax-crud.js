@@ -88,6 +88,13 @@
         token: token
     };
 
+    // Abre un modal al cargar la página (por ejemplo, una tarea elegida en "Mi panel").
+    $(function () {
+        $('[data-abrir-modal]').each(function () {
+            $.get($(this).data('abrir-modal')).done(abrirModal).fail(errorAjax);
+        });
+    });
+
     // Abrir formulario o detalle en el modal.
     $(document).on('click', '[data-modal-url]', function (e) {
         e.preventDefault();

@@ -16,7 +16,7 @@ namespace BoardyWeb.Comun
 
     public static class VencimientoTarea
     {
-        public const string NombreEstadoFinalizado = "Finalizada";
+        public const string NombreEstadoFinalizado = EstadosTareaSistema.Finalizada;
 
         private const int DiasProximaAVencer = 3;
 

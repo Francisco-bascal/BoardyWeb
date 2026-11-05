@@ -7,6 +7,9 @@ namespace BoardyWeb.Services
     {
         Task<IReadOnlyList<TareaDto>> ListarPorTableroAsync(int tableroId, CancellationToken cancellationToken = default);
 
+        /// <summary>Tareas no finalizadas asignadas al usuario, en todos sus tableros.</summary>
+        Task<IReadOnlyList<TareaDto>> ListarAsignadasAsync(string usuarioId, CancellationToken cancellationToken = default);
+
         Task<ResultadoOperacion<TareaDto>> ObtenerAsync(int tareaId, CancellationToken cancellationToken = default);
 
         Task<int?> ObtenerTableroIdAsync(int tareaId, CancellationToken cancellationToken = default);

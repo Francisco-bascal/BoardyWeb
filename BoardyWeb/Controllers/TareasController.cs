@@ -49,11 +49,19 @@ namespace BoardyWeb.Controllers
                 return noValido;
             }
 
+            // En Kanban solo se ofrecen los estados que tienen una lista adonde mover la tarea.
+            var estados = await _estadoTareaService.ListarAsync(cancellationToken);
+            var listas = await _listaTareaService.ListarAsync(tableroId, cancellationToken);
+            if (listas.First(l => l.ListaTareaId == tarea.Datos!.ListaTareaId).EstadoTareaId is not null)
+            {
+                estados = estados.Where(e => listas.Any(l => l.EstadoTareaId == e.EstadoTareaId)).ToList();
+            }
+
             var modelo = new TareaDetalleViewModel
             {
                 Tarea = tarea.Datos!,
                 Comentarios = await _comentarioService.ListarPorTareaAsync(id, cancellationToken),
-                Estados = await _estadoTareaService.ListarAsync(cancellationToken),
+                Estados = estados,
                 EtiquetasDelTablero = await _etiquetaService.ListarAsync(tableroId, cancellationToken),
                 MiembrosDelTablero = await _miembroService.ListarAsync(tableroId, cancellationToken),
                 UsuarioActualId = UsuarioId,
@@ -74,7 +82,7 @@ namespace BoardyWeb.Controllers
                 return acceso;
             }
 
-            await CargarSelectoresAsync(cancellationToken);
+            await CargarSelectoresAsync(listaTareaId, cancellationToken);
             ViewData["ListaTareaId"] = listaTareaId;
             return VistaFormulario(new CrearTareaDto());
         }
@@ -126,7 +134,7 @@ namespace BoardyWeb.Controllers
                 return noValido;
             }
 
-            await CargarSelectoresAsync(cancellationToken);
+            await CargarSelectoresAsync(tarea.Datos!.ListaTareaId, cancellationToken);
             ViewData["TareaId"] = id;
 
             return VistaFormulario(new ActualizarTareaDto
@@ -299,22 +307,31 @@ namespace BoardyWeb.Controllers
             return (error, tableroId ?? 0);
         }
 
-        private async Task CargarSelectoresAsync(CancellationToken cancellationToken)
+        // Si la lista tiene estado (Kanban) el formulario lo envía oculto en lugar de mostrar el selector.
+        private async Task CargarSelectoresAsync(int listaTareaId, CancellationToken cancellationToken)
         {
+            var estadoDeLista = await _listaTareaService.ObtenerEstadoAsync(listaTareaId, cancellationToken);
+            if (estadoDeLista is not null)
+            {
+                ViewData["EstadoFijo"] = estadoDeLista;
+                return;
+            }
+
             var estados = await _estadoTareaService.ListarAsync(cancellationToken);
             ViewData["Estados"] = new SelectList(estados, nameof(EstadoTareaDto.EstadoTareaId), nameof(EstadoTareaDto.Nombre));
         }
 
         private async Task<IActionResult> VolverAFormularioCrearAsync(int listaTareaId, CrearTareaDto dto, CancellationToken cancellationToken)
         {
-            await CargarSelectoresAsync(cancellationToken);
+            await CargarSelectoresAsync(listaTareaId, cancellationToken);
             ViewData["ListaTareaId"] = listaTareaId;
             return VistaFormulario(dto);
         }
 
         private async Task<IActionResult> VolverAFormularioEditarAsync(int tareaId, ActualizarTareaDto dto, CancellationToken cancellationToken)
         {
-            await CargarSelectoresAsync(cancellationToken);
+            var tarea = await _tareaService.ObtenerAsync(tareaId, cancellationToken);
+            await CargarSelectoresAsync(tarea.Datos!.ListaTareaId, cancellationToken);
             ViewData["TareaId"] = tareaId;
             return VistaFormulario(dto);
         }

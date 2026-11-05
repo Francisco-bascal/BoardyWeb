@@ -21,6 +21,19 @@
             <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
             <span asp-validation-for="Descripcion" class="text-danger"></span>
         </div>
+        @if (ViewData["Estados"] is SelectList estados)
+        {
+            <div class="mb-3">
+                <label asp-for="EstadoTareaId" class="form-label"></label>
+                <select asp-for="EstadoTareaId" class="form-select" asp-items="estados" required>
+                    <option value="">Seleccioná un estado</option>
+                </select>
+                <span asp-validation-for="EstadoTareaId" class="text-danger"></span>
+                <div class="form-text">
+                    @(estados.Any() ? "Las tareas de esta lista toman este estado." : "Todos los estados ya tienen su lista. Creá un estado nuevo en Plataforma o editá una lista existente.")
+                </div>
+            </div>
+        }
     </div>
     <div class="modal-footer">
         <a asp-controller="Tableros" asp-action="Detalle" asp-route-id="@ViewData["TableroId"]" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</a>

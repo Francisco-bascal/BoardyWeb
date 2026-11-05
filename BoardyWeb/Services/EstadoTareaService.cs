@@ -76,6 +76,11 @@ namespace BoardyWeb.Services
 
             var nombre = dto.Nombre.Trim();
 
+            if (nombre != estado.Nombre && EstadosTareaSistema.Todos.Contains(estado.Nombre))
+            {
+                return ResultadoOperacion<EstadoTareaDto>.Fallo(nameof(dto.Nombre), "No se puede renombrar un estado del sistema.");
+            }
+
             if (await _context.EstadoTareas.AnyAsync(e => e.Nombre == nombre && e.EstadoTareaId != estadoTareaId, cancellationToken))
             {
                 return ResultadoOperacion<EstadoTareaDto>.Fallo(nameof(dto.Nombre), "Ya existe un estado con ese nombre.");
@@ -96,6 +101,16 @@ namespace BoardyWeb.Services
             if (estado is null)
             {
                 return ResultadoOperacion.NoExiste("El estado de tarea no existe.");
+            }
+
+            if (EstadosTareaSistema.Todos.Contains(estado.Nombre))
+            {
+                return ResultadoOperacion.Fallo("No se puede eliminar un estado del sistema.");
+            }
+
+            if (await _context.ListaTareas.AnyAsync(l => l.EstadoTareaId == estadoTareaId, cancellationToken))
+            {
+                return ResultadoOperacion.Fallo("No se puede eliminar un estado vinculado a listas.");
             }
 
             if (await _context.Tareas.AnyAsync(t => t.EstadoTareaId == estadoTareaId, cancellationToken))

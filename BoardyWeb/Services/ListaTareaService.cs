@@ -27,7 +27,9 @@ namespace BoardyWeb.Services
                     Nombre = l.Nombre,
                     Descripcion = l.Descripcion,
                     Orden = l.Orden,
-                    TableroId = l.TableroId
+                    TableroId = l.TableroId,
+                    EstadoTareaId = l.EstadoTareaId,
+                    EstadoNombre = l.EstadoTarea != null ? l.EstadoTarea.Nombre : string.Empty
                 })
                 .ToListAsync(cancellationToken);
         }
@@ -41,11 +43,31 @@ namespace BoardyWeb.Services
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
+        public async Task<int?> ObtenerEstadoAsync(int listaTareaId, CancellationToken cancellationToken = default)
+        {
+            return await _context.ListaTareas
+                .AsNoTracking()
+                .Where(l => l.ListaTareaId == listaTareaId)
+                .Select(l => l.EstadoTareaId)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
         public async Task<ResultadoOperacion<ListaTareaDto>> CrearAsync(int tableroId, CrearListaTareaDto dto, CancellationToken cancellationToken = default)
         {
-            if (!await _context.Tableros.AnyAsync(t => t.TableroId == tableroId, cancellationToken))
+            var tablero = await _context.Tableros
+                .Where(t => t.TableroId == tableroId)
+                .Select(t => new { t.EsKanban })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (tablero is null)
             {
                 return ResultadoOperacion<ListaTareaDto>.NoExiste("El tablero no existe.");
+            }
+
+            var (estadoTareaId, error) = await ResolverEstadoAsync(tablero.EsKanban, tableroId, null, dto.EstadoTareaId, cancellationToken);
+            if (error is not null)
+            {
+                return ResultadoOperacion<ListaTareaDto>.Fallo(nameof(dto.EstadoTareaId), error);
             }
 
             var ultimoOrden = await _context.ListaTareas
@@ -57,7 +79,8 @@ namespace BoardyWeb.Services
                 TableroId = tableroId,
                 Nombre = dto.Nombre.Trim(),
                 Descripcion = dto.Descripcion.Trim(),
-                Orden = ultimoOrden + 1
+                Orden = ultimoOrden + 1,
+                EstadoTareaId = estadoTareaId
             };
 
             _context.ListaTareas.Add(lista);
@@ -68,15 +91,30 @@ namespace BoardyWeb.Services
 
         public async Task<ResultadoOperacion<ListaTareaDto>> ActualizarAsync(int listaTareaId, ActualizarListaTareaDto dto, CancellationToken cancellationToken = default)
         {
-            var lista = await _context.ListaTareas.FirstOrDefaultAsync(l => l.ListaTareaId == listaTareaId, cancellationToken);
+            var lista = await _context.ListaTareas
+                .Include(l => l.Tablero)
+                .FirstOrDefaultAsync(l => l.ListaTareaId == listaTareaId, cancellationToken);
 
             if (lista is null)
             {
                 return ResultadoOperacion<ListaTareaDto>.NoExiste("La lista no existe.");
             }
 
+            var (estadoTareaId, error) = await ResolverEstadoAsync(lista.Tablero.EsKanban, lista.TableroId, listaTareaId, dto.EstadoTareaId, cancellationToken);
+            if (error is not null)
+            {
+                return ResultadoOperacion<ListaTareaDto>.Fallo(nameof(dto.EstadoTareaId), error);
+            }
+
+            if (estadoTareaId is not null && estadoTareaId != lista.EstadoTareaId)
+            {
+                var tareas = await _context.Tareas.Where(t => t.ListaTareaId == listaTareaId).ToListAsync(cancellationToken);
+                tareas.ForEach(t => t.EstadoTareaId = estadoTareaId.Value);
+            }
+
             lista.Nombre = dto.Nombre.Trim();
             lista.Descripcion = dto.Descripcion.Trim();
+            lista.EstadoTareaId = estadoTareaId;
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion<ListaTareaDto>.Exitoso(Mapear(lista), "Lista actualizada correctamente.");
@@ -129,13 +167,35 @@ namespace BoardyWeb.Services
             return ResultadoOperacion.Exitoso("Lista eliminada correctamente.");
         }
 
+        // En Kanban el estado es obligatorio y único por tablero; en esquema libre las listas nunca tienen estado.
+        private async Task<(int? EstadoTareaId, string? Error)> ResolverEstadoAsync(bool? esKanban, int tableroId, int? listaTareaId, int? estadoTareaId, CancellationToken cancellationToken)
+        {
+            if (esKanban != true)
+            {
+                return (null, null);
+            }
+
+            if (estadoTareaId is null || !await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == estadoTareaId, cancellationToken))
+            {
+                return (null, "Debés seleccionar un estado.");
+            }
+
+            if (await _context.ListaTareas.AnyAsync(l => l.TableroId == tableroId && l.EstadoTareaId == estadoTareaId && l.ListaTareaId != listaTareaId, cancellationToken))
+            {
+                return (null, "Ya existe una lista para ese estado.");
+            }
+
+            return (estadoTareaId, null);
+        }
+
         private static ListaTareaDto Mapear(ListaTarea lista) => new()
         {
             ListaTareaId = lista.ListaTareaId,
             Nombre = lista.Nombre,
             Descripcion = lista.Descripcion,
             Orden = lista.Orden,
-            TableroId = lista.TableroId
+            TableroId = lista.TableroId,
+            EstadoTareaId = lista.EstadoTareaId
         };
     }
 }

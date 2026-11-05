@@ -9,6 +9,8 @@ namespace BoardyWeb.Services
 
         Task<ResultadoOperacion<TableroDetalleDto>> ObtenerDetalleAsync(int tableroId, string usuarioId, CancellationToken cancellationToken = default);
 
+        Task<bool> EsKanbanAsync(int tableroId, CancellationToken cancellationToken = default);
+
         Task<ResultadoOperacion<TableroDto>> CrearAsync(CrearTableroDto dto, string usuarioId, CancellationToken cancellationToken = default);
 
         Task<ResultadoOperacion<TableroDto>> ActualizarAsync(int tableroId, ActualizarTableroDto dto, CancellationToken cancellationToken = default);

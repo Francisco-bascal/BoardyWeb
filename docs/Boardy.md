@@ -78,6 +78,13 @@ Políticas: `VerTablero`, `ColaborarEnTablero`, `AdministrarTablero`, `Gestionar
 - Panel de tableros en grilla (1, 2 o 3 por fila). Chip de vencimiento con semáforo: vencida (negro), hoy (rojo), hasta 3 días (amarillo), más de 3 días (verde).
 - Textos, validaciones y mensajes de Identity en español (cultura `es-AR`).
 
+## Esquemas, panel y plataforma
+
+- **Esquema del tablero** (`Tablero.EsKanban`, se elige al crearlo): en Kanban cada lista tiene un estado obligatorio (`ListaTarea.EstadoTareaId`), mover una tarea cambia su estado y cambiar el estado la mueve a la lista correspondiente. En esquema libre las listas no tienen estado.
+- **Mi panel**: tareas abiertas asignadas al usuario, por tablero; el clic abre la tarea en su tablero.
+- **Plataforma** (rol global Administrador): usuarios (activar/desactivar, rol Administrador), catálogos y logs de error.
+- **Auditoría del tablero** (Propietario y Administrador): lista cronológica con filtro por usuario.
+
 ## Puesta en marcha
 
 1. Copiar `BoardyWeb/appsettings.example.json` como `appsettings.json` (no se versiona, está en `.gitignore`) y configurar la cadena de conexión `DefaultConnection`.

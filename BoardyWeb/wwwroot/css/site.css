@@ -872,3 +872,7 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+.nav-pills {
+  --bs-nav-pills-link-active-bg: var(--boardy-acento-solido);
+}

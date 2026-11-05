@@ -5,6 +5,11 @@
 
 <partial name="_Kanban" model="Model" />
 
+@if (ViewData["AbrirTarea"] is int tareaId)
+{
+    <div data-abrir-modal="@Url.Action("Detalle", "Tareas", new { id = tareaId })" hidden></div>
+}
+
 @section Scripts {
     <script src="~/lib/sortablejs/Sortable.min.js"></script>
     <script src="~/js/kanban-dnd.js" asp-append-version="true"></script>

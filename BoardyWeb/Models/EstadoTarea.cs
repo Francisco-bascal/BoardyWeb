@@ -9,5 +9,7 @@ namespace BoardyWeb.Models
         public string Descripcion { get; set; } = string.Empty;
 
         public ICollection<Tarea> Tareas { get; set; } = new List<Tarea>();
+
+        public ICollection<ListaTarea> Listas { get; set; } = new List<ListaTarea>();
     }
 }

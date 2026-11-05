@@ -1,0 +1,50 @@
+@using BoardyWeb.Comun
+@model Pagina<RegistroErrorDto>
+@{
+    ViewData["Title"] = "Logs de error";
+}
+
+<partial name="_PestanasPlataforma" />
+
+<div class="pagina-encabezado">
+    <h1>Logs de error</h1>
+</div>
+
+@if (!Model.Elementos.Any())
+{
+    <div class="estado-vacio">
+        <i class="bi bi-bug"></i>
+        <strong>No hay errores registrados</strong>
+    </div>
+}
+else
+{
+    <div class="tabla-contenedor">
+        <table class="table align-middle">
+            <thead>
+                <tr><th>Fecha (UTC)</th><th>Ruta</th><th>Error</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var registro in Model.Elementos)
+                {
+                    <tr>
+                        <td class="text-nowrap">@registro.Fecha.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                        <td class="mono small">@registro.Ruta</td>
+                        <td>
+                            <details>
+                                <summary>@registro.Mensaje</summary>
+                                <pre class="small mt-2 mb-0">@registro.Detalle</pre>
+                            </details>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <a class="btn btn-outline-secondary@(Model.Numero <= 1 ? " disabled" : "")" asp-action="Logs" asp-route-pagina="@(Model.Numero - 1)">Anterior</a>
+        <span class="small text-suave">Página @Model.Numero de @Model.TotalPaginas</span>
+        <a class="btn btn-outline-secondary@(Model.Numero >= Model.TotalPaginas ? " disabled" : "")" asp-action="Logs" asp-route-pagina="@(Model.Numero + 1)">Siguiente</a>
+    </div>
+}

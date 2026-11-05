@@ -3,20 +3,42 @@ using BoardyWeb.DTOs;
 using BoardyWeb.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BoardyWeb.Controllers
 {
     public class ListasTareaController : ControladorTableroBase
     {
         private readonly IListaTareaService _listaTareaService;
+        private readonly ITableroService _tableroService;
+        private readonly IEstadoTareaService _estadoTareaService;
 
-        public ListasTareaController(IListaTareaService listaTareaService, IAuthorizationService autorizacion)
-            : base(autorizacion)
+        public ListasTareaController(
+            IListaTareaService listaTareaService,
+            ITableroService tableroService,
+            IEstadoTareaService estadoTareaService,
+            IAuthorizationService autorizacion) : base(autorizacion)
         {
             _listaTareaService = listaTareaService;
+            _tableroService = tableroService;
+            _estadoTareaService = estadoTareaService;
         }
 
-        public async Task<IActionResult> Crear(int tableroId)
+        // Solo los tableros Kanban eligen estado: sin este ViewData el formulario no muestra el selector.
+        private async Task CargarEstadosAsync(int tableroId, int? listaTareaId, CancellationToken cancellationToken)
+        {
+            if (await _tableroService.EsKanbanAsync(tableroId, cancellationToken))
+            {
+                // Solo los estados sin lista, más el de la lista que se está editando.
+                var listas = await _listaTareaService.ListarAsync(tableroId, cancellationToken);
+                var estados = (await _estadoTareaService.ListarAsync(cancellationToken))
+                    .Where(e => !listas.Any(l => l.EstadoTareaId == e.EstadoTareaId && l.ListaTareaId != listaTareaId))
+                    .ToList();
+                ViewData["Estados"] = new SelectList(estados, nameof(EstadoTareaDto.EstadoTareaId), nameof(EstadoTareaDto.Nombre));
+            }
+        }
+
+        public async Task<IActionResult> Crear(int tableroId, CancellationToken cancellationToken)
         {
             var acceso = await ValidarAccesoAsync(tableroId, PoliticasTablero.AdministrarTablero);
             if (acceso is not null)
@@ -25,6 +47,7 @@ namespace BoardyWeb.Controllers
             }
 
             ViewData["TableroId"] = tableroId;
+            await CargarEstadosAsync(tableroId, null, cancellationToken);
             return VistaFormulario(new CrearListaTareaDto());
         }
 
@@ -39,6 +62,7 @@ namespace BoardyWeb.Controllers
             }
 
             ViewData["TableroId"] = tableroId;
+            await CargarEstadosAsync(tableroId, null, cancellationToken);
 
             if (!ModelState.IsValid)
             {
@@ -75,7 +99,8 @@ namespace BoardyWeb.Controllers
 
             ViewData["ListaTareaId"] = id;
             ViewData["TableroId"] = tableroId;
-            return VistaFormulario(new ActualizarListaTareaDto { Nombre = lista.Nombre, Descripcion = lista.Descripcion });
+            await CargarEstadosAsync(tableroId.Value, id, cancellationToken);
+            return VistaFormulario(new ActualizarListaTareaDto { Nombre = lista.Nombre, Descripcion = lista.Descripcion, EstadoTareaId = lista.EstadoTareaId });
         }
 
         [HttpPost]
@@ -91,6 +116,7 @@ namespace BoardyWeb.Controllers
 
             ViewData["ListaTareaId"] = id;
             ViewData["TableroId"] = tableroId;
+            await CargarEstadosAsync(tableroId!.Value, id, cancellationToken);
 
             if (!ModelState.IsValid)
             {

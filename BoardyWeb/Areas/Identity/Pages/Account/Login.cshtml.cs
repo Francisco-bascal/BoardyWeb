@@ -112,6 +112,14 @@ namespace BoardyWeb.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
+                // Se avisa solo con la contraseña correcta, para no revelar qué cuentas existen.
+                var usuario = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+                if (usuario is { Estado: false } && await _signInManager.UserManager.CheckPasswordAsync(usuario, Input.Password))
+                {
+                    ModelState.AddModelError(string.Empty, "Tu cuenta está desactivada. Contactá a un administrador.");
+                    return Page();
+                }
+
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);

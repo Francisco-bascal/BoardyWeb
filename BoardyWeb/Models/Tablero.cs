@@ -16,6 +16,9 @@ namespace BoardyWeb.Models
         [StringLength(1000, ErrorMessage = "El {0} no puede superar los {1} caracteres.")]
         public string Descripcion { get; set; } = string.Empty;
 
+        /// <summary>true: Kanban (cada lista tiene un estado). false o null: esquema libre.</summary>
+        public bool? EsKanban { get; set; }
+
         public string PropietarioId { get; set; } = null!;
 
         public Usuario Propietario { get; set; } = null!;

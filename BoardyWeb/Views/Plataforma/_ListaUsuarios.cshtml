@@ -1,0 +1,38 @@
+@model IReadOnlyList<UsuarioAdministracionDto>
+
+<div id="region-usuarios" data-region-url="@Url.Action("Index", "Plataforma")">
+    <div class="tabla-contenedor">
+        <table class="table align-middle">
+            <thead>
+                <tr><th>Usuario</th><th>Registro</th><th>Estado</th><th>Rol global</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var usuario in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">@usuario.NombreCompleto</div>
+                            <div class="small text-suave">@usuario.Email</div>
+                        </td>
+                        <td class="text-suave">@usuario.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                        <td><span class="chip">@(usuario.Activo ? "Activo" : "Desactivado")</span></td>
+                        <td><span class="chip">@(usuario.EsAdministrador ? "Administrador" : "Usuario")</span></td>
+                        <td class="text-end text-nowrap">
+                            @if (usuario.UsuarioId != ViewData["UsuarioActualId"] as string)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-accion-url="@Url.Action("AlternarAdministrador", "Plataforma", new { id = usuario.UsuarioId })"
+                                        data-confirmar="@(usuario.EsAdministrador ? "¿Quitar" : "¿Dar") el rol Administrador a @usuario.NombreCompleto? Se cerrarán sus sesiones.">
+                                    @(usuario.EsAdministrador ? "Quitar administrador" : "Hacer administrador")
+                                </button>
+                                <button type="button" class="btn btn-sm @(usuario.Activo ? "btn-outline-danger" : "btn-outline-primary")" data-accion-url="@Url.Action("AlternarEstado", "Plataforma", new { id = usuario.UsuarioId })"
+                                        data-confirmar="¿@(usuario.Activo ? "Desactivar" : "Activar") a @usuario.NombreCompleto?">
+                                    @(usuario.Activo ? "Desactivar" : "Activar")
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

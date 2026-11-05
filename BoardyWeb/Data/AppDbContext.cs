@@ -26,6 +26,8 @@ namespace BoardyWeb.Data
         public DbSet<TareaMiembro> TareaMiembros { get; set; } = null!;
         public DbSet<Etiqueta> Etiquetas { get; set; } = null!;
         public DbSet<TareaEtiqueta> TareaEtiquetas { get; set; } = null!;
+        public DbSet<RegistroAuditoria> RegistrosAuditoria { get; set; } = null!;
+        public DbSet<RegistroError> RegistrosError { get; set; } = null!;
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
@@ -114,6 +116,7 @@ namespace BoardyWeb.Data
             {
                 entity.HasKey(l => l.ListaTareaId);
                 entity.HasOne(l => l.Tablero).WithMany(t => t.ListasTarea).HasForeignKey(l => l.TableroId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(l => l.EstadoTarea).WithMany(e => e.Listas).HasForeignKey(l => l.EstadoTareaId).OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Tarea>(entity =>
@@ -143,6 +146,20 @@ namespace BoardyWeb.Data
                 entity.HasKey(e => e.EtiquetaId);
                 entity.HasIndex(e => new { e.TableroId, e.Nombre }).IsUnique();
                 entity.HasOne(e => e.Tablero).WithMany(t => t.Etiquetas).HasForeignKey(e => e.TableroId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<RegistroAuditoria>(entity =>
+            {
+                entity.HasKey(r => r.RegistroAuditoriaId);
+                entity.HasIndex(r => new { r.TableroId, r.Fecha });
+                entity.HasOne(r => r.Tablero).WithMany().HasForeignKey(r => r.TableroId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(r => r.Usuario).WithMany().HasForeignKey(r => r.UsuarioId).OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<RegistroError>(entity =>
+            {
+                entity.HasKey(r => r.RegistroErrorId);
+                entity.HasIndex(r => r.Fecha);
             });
 
             modelBuilder.Entity<TareaEtiqueta>(entity =>
