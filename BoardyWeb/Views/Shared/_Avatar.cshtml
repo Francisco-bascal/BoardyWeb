@@ -1,0 +1,21 @@
+@model (string Nombre, string? Foto, string Clase)
+@{
+    var partes = Model.Nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var iniciales = partes.Length switch
+    {
+        0 => "?",
+        1 => partes[0][..1],
+        _ => partes[0][..1] + partes[^1][..1]
+    };
+}
+
+<span class="avatar @Model.Clase" title="@Model.Nombre">
+    @if (Model.Foto is null)
+    {
+        @iniciales
+    }
+    else
+    {
+        <img src="@Model.Foto" alt="" />
+    }
+</span>

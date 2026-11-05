@@ -9,10 +9,12 @@ namespace BoardyWeb.Services
     public class ListaTareaService : IListaTareaService
     {
         private readonly AppDbContext _context;
+        private readonly IAuditoriaService _auditoria;
 
-        public ListaTareaService(AppDbContext context)
+        public ListaTareaService(AppDbContext context, IAuditoriaService auditoria)
         {
             _context = context;
+            _auditoria = auditoria;
         }
 
         public async Task<IReadOnlyList<ListaTareaDto>> ListarAsync(int tableroId, CancellationToken cancellationToken = default)
@@ -84,6 +86,7 @@ namespace BoardyWeb.Services
             };
 
             _context.ListaTareas.Add(lista);
+            _auditoria.Registrar(tableroId, $"Creó la lista \"{lista.Nombre}\".");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion<ListaTareaDto>.Exitoso(Mapear(lista), "Lista creada correctamente.");
@@ -115,6 +118,7 @@ namespace BoardyWeb.Services
             lista.Nombre = dto.Nombre.Trim();
             lista.Descripcion = dto.Descripcion.Trim();
             lista.EstadoTareaId = estadoTareaId;
+            _auditoria.Registrar(lista.TableroId, $"Editó la lista \"{lista.Nombre}\".");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion<ListaTareaDto>.Exitoso(Mapear(lista), "Lista actualizada correctamente.");
@@ -142,6 +146,7 @@ namespace BoardyWeb.Services
                 listas[i].Orden = i + 1;
             }
 
+            _auditoria.Registrar(lista.TableroId, $"Reordenó la lista \"{lista.Nombre}\".");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion.Exitoso("Lista reordenada correctamente.");
@@ -162,6 +167,7 @@ namespace BoardyWeb.Services
             }
 
             _context.ListaTareas.Remove(lista);
+            _auditoria.Registrar(lista.TableroId, $"Eliminó la lista \"{lista.Nombre}\".");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion.Exitoso("Lista eliminada correctamente.");

@@ -21,6 +21,9 @@ namespace BoardyWeb.Models
         [Display(Name = "Estado")]
         public bool Estado { get; set; } = true;
 
+        /// <summary>Ruta pública de la foto de perfil, por ejemplo /uploads/abc.png.</summary>
+        public string? FotoPerfil { get; set; }
+
         public ICollection<Tablero> TablerosPropios { get; set; } = new List<Tablero>();
 
         public ICollection<TableroMiembro> TablerosMiembro { get; set; } = new List<TableroMiembro>();

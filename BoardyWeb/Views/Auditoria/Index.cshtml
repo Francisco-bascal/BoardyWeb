@@ -18,6 +18,7 @@
             <option value="">Todos los usuarios</option>
         </select>
         <button type="submit" class="btn btn-outline-secondary">Filtrar</button>
+        <a asp-action="ReportePdf" asp-route-tableroId="@tableroId" asp-route-usuarioId="@usuarioId" class="btn btn-outline-secondary text-nowrap"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a>
     </form>
 </div>
 

@@ -10,10 +10,12 @@ namespace BoardyWeb.Services
     public class MiembroTableroService : IMiembroTableroService
     {
         private readonly AppDbContext _context;
+        private readonly IAuditoriaService _auditoria;
 
-        public MiembroTableroService(AppDbContext context)
+        public MiembroTableroService(AppDbContext context, IAuditoriaService auditoria)
         {
             _context = context;
+            _auditoria = auditoria;
         }
 
         public async Task<IReadOnlyList<TableroMiembroDto>> ListarAsync(int tableroId, CancellationToken cancellationToken = default)
@@ -59,6 +61,7 @@ namespace BoardyWeb.Services
             };
 
             _context.TableroMiembros.Add(miembro);
+            _auditoria.Registrar(tableroId, $"Agregó a {dto.Email} como miembro.");
             await _context.SaveChangesAsync(cancellationToken);
 
             return await ObtenerMiembroAsync(tableroId, miembro.TableroMiembroId, "Miembro agregado correctamente.", cancellationToken);
@@ -94,6 +97,9 @@ namespace BoardyWeb.Services
             // Un miembro tiene un único rol: el nuevo reemplaza al anterior en un solo SaveChanges.
             _context.MiembrosPorRol.RemoveRange(miembro.Roles);
             miembro.Roles.Add(new MiembrosPorRol { RolMiembroId = dto.RolMiembroId, FechaAsignacion = DateTime.UtcNow });
+            var nombreMiembro = await _context.Users.Where(u => u.Id == miembro.UsuarioId).Select(u => u.Nombre + " " + u.Apellido).FirstAsync(cancellationToken);
+            var nombreRol = await _context.RolMiembros.Where(r => r.RolMiembroId == dto.RolMiembroId).Select(r => r.Nombre).FirstAsync(cancellationToken);
+            _auditoria.Registrar(tableroId, $"Cambió el rol de {nombreMiembro} a {nombreRol}.");
             await _context.SaveChangesAsync(cancellationToken);
 
             return await ObtenerMiembroAsync(tableroId, tableroMiembroId, "Rol actualizado correctamente.", cancellationToken);
@@ -118,6 +124,8 @@ namespace BoardyWeb.Services
             // Las asignaciones a tareas tienen borrado restringido, por lo que se quitan junto con el miembro.
             _context.TareaMiembros.RemoveRange(miembro.TareasAsignadas);
             _context.TableroMiembros.Remove(miembro);
+            var nombreMiembro = await _context.Users.Where(u => u.Id == miembro.UsuarioId).Select(u => u.Nombre + " " + u.Apellido).FirstAsync(cancellationToken);
+            _auditoria.Registrar(tableroId, $"Quitó a {nombreMiembro} del tablero.");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion.Exitoso("Miembro quitado correctamente.");
@@ -136,6 +144,7 @@ namespace BoardyWeb.Services
                     NombreCompleto = m.Usuario.Nombre + " " + m.Usuario.Apellido,
                     Email = m.Usuario.Email ?? string.Empty,
                     EsPropietario = m.Tablero.PropietarioId == m.UsuarioId,
+                    FotoPerfil = m.Usuario.FotoPerfil,
                     Roles = m.Roles
                         .Select(r => new RolMiembroDto
                         {

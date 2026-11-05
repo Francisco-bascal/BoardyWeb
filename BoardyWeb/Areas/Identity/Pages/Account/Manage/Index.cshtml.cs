@@ -1,3 +1,5 @@
+using BoardyWeb.Comun;
+using BoardyWeb.Services;
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
@@ -17,13 +19,16 @@ namespace BoardyWeb.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<Usuario> _userManager;
         private readonly SignInManager<Usuario> _signInManager;
+        private readonly IFotoPerfilService _fotoPerfilService;
 
         public IndexModel(
             UserManager<Usuario> userManager,
-            SignInManager<Usuario> signInManager)
+            SignInManager<Usuario> signInManager,
+            IFotoPerfilService fotoPerfilService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _fotoPerfilService = fotoPerfilService;
         }
 
         /// <summary>
@@ -31,6 +36,10 @@ namespace BoardyWeb.Areas.Identity.Pages.Account.Manage
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public string Username { get; set; }
+
+        public string NombreCompleto { get; set; }
+
+        public string FotoPerfil { get; set; }
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -67,6 +76,8 @@ namespace BoardyWeb.Areas.Identity.Pages.Account.Manage
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
             Username = userName;
+            NombreCompleto = user.Nombre + " " + user.Apellido;
+            FotoPerfil = user.FotoPerfil;
 
             Input = new InputModel
             {
@@ -84,6 +95,35 @@ namespace BoardyWeb.Areas.Identity.Pages.Account.Manage
 
             await LoadAsync(user);
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostFotoAsync(IFormFile foto)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var resultado = foto is null
+                ? ResultadoOperacion.Fallo("Elegí una imagen.")
+                : await _fotoPerfilService.GuardarAsync(user, foto, HttpContext.RequestAborted);
+
+            StatusMessage = resultado.Exito ? resultado.Mensaje : "Error: " + resultado.Mensaje;
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostQuitarFotoAsync()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var resultado = await _fotoPerfilService.QuitarAsync(user);
+            StatusMessage = resultado.Exito ? resultado.Mensaje : "Error: " + resultado.Mensaje;
+            return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostAsync()

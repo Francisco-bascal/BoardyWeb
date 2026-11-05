@@ -9,10 +9,12 @@ namespace BoardyWeb.Services
     public class EtiquetaService : IEtiquetaService
     {
         private readonly AppDbContext _context;
+        private readonly IAuditoriaService _auditoria;
 
-        public EtiquetaService(AppDbContext context)
+        public EtiquetaService(AppDbContext context, IAuditoriaService auditoria)
         {
             _context = context;
+            _auditoria = auditoria;
         }
 
         public async Task<IReadOnlyList<EtiquetaDto>> ListarAsync(int tableroId, CancellationToken cancellationToken = default)
@@ -64,6 +66,7 @@ namespace BoardyWeb.Services
             };
 
             _context.Etiquetas.Add(etiqueta);
+            _auditoria.Registrar(tableroId, $"Creó la etiqueta \"{etiqueta.Nombre}\".");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion<EtiquetaDto>.Exitoso(Mapear(etiqueta, 0), "Etiqueta creada correctamente.");
@@ -88,6 +91,7 @@ namespace BoardyWeb.Services
             etiqueta.Nombre = nombre;
             etiqueta.Descripcion = dto.Descripcion.Trim();
             etiqueta.Color = dto.Color;
+            _auditoria.Registrar(etiqueta.TableroId, $"Editó la etiqueta \"{etiqueta.Nombre}\".");
             await _context.SaveChangesAsync(cancellationToken);
 
             var cantidadTareas = await _context.TareaEtiquetas.CountAsync(te => te.EtiquetaId == etiquetaId, cancellationToken);
@@ -109,6 +113,7 @@ namespace BoardyWeb.Services
             }
 
             _context.Etiquetas.Remove(etiqueta);
+            _auditoria.Registrar(etiqueta.TableroId, $"Eliminó la etiqueta \"{etiqueta.Nombre}\".");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion.Exitoso("Etiqueta eliminada correctamente.");
@@ -139,6 +144,9 @@ namespace BoardyWeb.Services
             }
 
             _context.TareaEtiquetas.Add(new TareaEtiqueta { TareaId = tareaId, EtiquetaId = etiquetaId, FechaAsignacion = DateTime.UtcNow });
+            var nombreEtiqueta = await _context.Etiquetas.Where(e => e.EtiquetaId == etiquetaId).Select(e => e.Nombre).FirstAsync(cancellationToken);
+            var tituloTarea = await _context.Tareas.Where(t => t.TareaId == tareaId).Select(t => t.Titulo).FirstAsync(cancellationToken);
+            _auditoria.Registrar(tableroTareaId.Value, $"Agregó la etiqueta \"{nombreEtiqueta}\" a la tarea \"{tituloTarea}\".");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion.Exitoso("Etiqueta asignada correctamente.");
@@ -155,6 +163,8 @@ namespace BoardyWeb.Services
             }
 
             _context.TareaEtiquetas.Remove(asignacion);
+            var datos = await _context.TareaEtiquetas.Where(te => te.TareaEtiquetaId == asignacion.TareaEtiquetaId).Select(te => new { te.Etiqueta.TableroId, Etiqueta = te.Etiqueta.Nombre, te.Tarea.Titulo }).FirstAsync(cancellationToken);
+            _auditoria.Registrar(datos.TableroId, $"Quitó la etiqueta \"{datos.Etiqueta}\" de la tarea \"{datos.Titulo}\".");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion.Exitoso("Etiqueta quitada correctamente.");

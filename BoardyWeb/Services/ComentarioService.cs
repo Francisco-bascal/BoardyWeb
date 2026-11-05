@@ -9,10 +9,12 @@ namespace BoardyWeb.Services
     public class ComentarioService : IComentarioService
     {
         private readonly AppDbContext _context;
+        private readonly IAuditoriaService _auditoria;
 
-        public ComentarioService(AppDbContext context)
+        public ComentarioService(AppDbContext context, IAuditoriaService auditoria)
         {
             _context = context;
+            _auditoria = auditoria;
         }
 
         public async Task<IReadOnlyList<ComentarioDto>> ListarPorTareaAsync(int tareaId, CancellationToken cancellationToken = default)
@@ -56,6 +58,8 @@ namespace BoardyWeb.Services
             };
 
             _context.Comentarios.Add(comentario);
+            var tarea = await _context.Tareas.Where(t => t.TareaId == tareaId).Select(t => new { t.Titulo, t.ListaTarea.TableroId }).FirstAsync(cancellationToken);
+            _auditoria.Registrar(tarea.TableroId, $"Comentó en la tarea \"{tarea.Titulo}\".");
             await _context.SaveChangesAsync(cancellationToken);
 
             var resultado = await _context.Comentarios
@@ -89,6 +93,8 @@ namespace BoardyWeb.Services
             }
 
             _context.Comentarios.Remove(comentario);
+            var tarea = await _context.Tareas.Where(t => t.TareaId == comentario.TareaId).Select(t => new { t.Titulo, t.ListaTarea.TableroId }).FirstAsync(cancellationToken);
+            _auditoria.Registrar(tarea.TableroId, $"Eliminó un comentario de la tarea \"{tarea.Titulo}\".");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion.Exitoso("Comentario eliminado correctamente.");

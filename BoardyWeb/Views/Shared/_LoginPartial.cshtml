@@ -2,15 +2,17 @@
 @using BoardyWeb.Models
 
 @inject SignInManager<Usuario> SignInManager
+@inject UserManager<Usuario> UserManager
 
 @if (SignInManager.IsSignedIn(User))
 {
     var correo = User.Identity?.Name ?? string.Empty;
-    var inicial = correo.Length > 0 ? correo[..1] : "?";
+    var usuario = await UserManager.GetUserAsync(User);
+    var nombreCompleto = usuario is null ? correo : usuario.Nombre + " " + usuario.Apellido;
 
     <div class="dropdown">
         <button class="btn btn-outline-secondary d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <span class="avatar">@inicial</span>
+            <partial name="_Avatar" model="(nombreCompleto, usuario?.FotoPerfil, string.Empty)" />
             <span class="d-none d-lg-inline small text-truncate" style="max-width: 11rem;">@correo</span>
         </button>
         <ul class="dropdown-menu dropdown-menu-end">

@@ -4,17 +4,6 @@
     var roles = ViewData["Roles"] as SelectList;
     var puedeAdministrar = ViewData["PuedeAdministrar"] is true;
     var puedeGestionar = ViewData["PuedeGestionar"] is true;
-
-    string Iniciales(string nombre)
-    {
-        var partes = nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return partes.Length switch
-        {
-            0 => "?",
-            1 => partes[0][..1],
-            _ => partes[0][..1] + partes[^1][..1]
-        };
-    }
 }
 
 <div id="region-miembros" data-region-url="@Url.Action("Index", "Miembros", new { tableroId })">
@@ -30,7 +19,7 @@
                     <tr>
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                <span class="avatar avatar-lg">@Iniciales(miembro.NombreCompleto)</span>
+                                <partial name="_Avatar" model='(miembro.NombreCompleto, miembro.FotoPerfil, "avatar-lg")' />
                                 <div>
                                     <div class="fw-semibold">@miembro.NombreCompleto</div>
                                     <div class="small text-suave">@miembro.Email</div>

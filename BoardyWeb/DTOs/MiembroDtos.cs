@@ -14,6 +14,8 @@ namespace BoardyWeb.DTOs
 
         public bool EsPropietario { get; set; }
 
+        public string? FotoPerfil { get; set; }
+
         public IReadOnlyList<RolMiembroDto> Roles { get; set; } = new List<RolMiembroDto>();
     }
 

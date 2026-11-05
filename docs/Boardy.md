@@ -85,6 +85,13 @@ Políticas: `VerTablero`, `ColaborarEnTablero`, `AdministrarTablero`, `Gestionar
 - **Plataforma** (rol global Administrador): usuarios (activar/desactivar, rol Administrador), catálogos y logs de error.
 - **Auditoría del tablero** (Propietario y Administrador): lista cronológica con filtro por usuario.
 
+## Auditoría, errores, fotos y reportes
+
+- **Auditoría**: cada operación llama a `IAuditoriaService.Registrar`, que agrega la fila sin guardar; el `SaveChangesAsync` de la operación persiste ambas en una transacción.
+- **Errores**: `RegistroErroresMiddleware` guarda las excepciones no controladas, visibles en Plataforma → Logs.
+- **Foto de perfil**: en `wwwroot/uploads` (no versionada), hasta 2 MB, JPG/PNG/WebP validados por contenido.
+- **PDF** (QuestPDF, licencia Community): reporte del tablero, mis tareas y auditoría filtrada.
+
 ## Puesta en marcha
 
 1. Copiar `BoardyWeb/appsettings.example.json` como `appsettings.json` (no se versiona, está en `.gitignore`) y configurar la cadena de conexión `DefaultConnection`.

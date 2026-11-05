@@ -12,16 +12,19 @@ namespace BoardyWeb.Controllers
         private readonly ITableroService _tableroService;
         private readonly IListaTareaService _listaTareaService;
         private readonly ITareaService _tareaService;
+        private readonly IReporteService _reporteService;
 
         public TablerosController(
             ITableroService tableroService,
             IListaTareaService listaTareaService,
             ITareaService tareaService,
+            IReporteService reporteService,
             IAuthorizationService autorizacion) : base(autorizacion)
         {
             _tableroService = tableroService;
             _listaTareaService = listaTareaService;
             _tareaService = tareaService;
+            _reporteService = reporteService;
         }
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
@@ -57,6 +60,29 @@ namespace BoardyWeb.Controllers
 
             ViewData["AbrirTarea"] = tarea;
             return Vista("_Kanban", modelo);
+        }
+
+        public async Task<IActionResult> ReportePdf(int id, CancellationToken cancellationToken)
+        {
+            var acceso = await ValidarAccesoAsync(id, PoliticasTablero.VerTablero);
+            if (acceso is not null)
+            {
+                return acceso;
+            }
+
+            var tablero = await _tableroService.ObtenerDetalleAsync(id, UsuarioId, cancellationToken);
+            var noValido = ResultadoNoValido(tablero);
+            if (noValido is not null)
+            {
+                return noValido;
+            }
+
+            var pdf = _reporteService.GenerarTablero(
+                tablero.Datos!,
+                await _listaTareaService.ListarAsync(id, cancellationToken),
+                await _tareaService.ListarPorTableroAsync(id, cancellationToken));
+
+            return File(pdf, "application/pdf", $"tablero-{id}.pdf");
         }
 
         public IActionResult Crear()

@@ -876,3 +876,16 @@ a {
 .nav-pills {
   --bs-nav-pills-link-active-bg: var(--boardy-acento-solido);
 }
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-perfil {
+  width: 5rem;
+  height: 5rem;
+  font-size: 1.5rem;
+}

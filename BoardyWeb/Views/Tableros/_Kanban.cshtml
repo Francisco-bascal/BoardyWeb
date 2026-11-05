@@ -2,17 +2,6 @@
 @{
     var tablero = Model.Tablero;
     var columnas = Math.Clamp(Model.Listas.Count, 2, 4);
-
-    string Iniciales(string nombre)
-    {
-        var partes = nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return partes.Length switch
-        {
-            0 => "?",
-            1 => partes[0][..1],
-            _ => partes[0][..1] + partes[^1][..1]
-        };
-    }
 }
 
 <div id="region-kanban" data-region-url="@Url.Action("Detalle", "Tableros", new { id = tablero.TableroId })">
@@ -34,6 +23,7 @@
         <div class="d-flex flex-wrap gap-2">
             <a asp-controller="Miembros" asp-action="Index" asp-route-tableroId="@tablero.TableroId" class="btn btn-outline-secondary"><i class="bi bi-people me-1"></i>Miembros</a>
             <a asp-controller="Etiquetas" asp-action="Index" asp-route-tableroId="@tablero.TableroId" class="btn btn-outline-secondary"><i class="bi bi-tags me-1"></i>Etiquetas</a>
+            <a asp-controller="Tableros" asp-action="ReportePdf" asp-route-id="@tablero.TableroId" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a>
             @if (Model.PuedeAdministrar)
             {
                 <a asp-controller="Invitaciones" asp-action="DelTablero" asp-route-tableroId="@tablero.TableroId" class="btn btn-outline-secondary"><i class="bi bi-envelope-plus me-1"></i>Invitaciones</a>
@@ -143,7 +133,7 @@
                                     <div class="avatares">
                                         @foreach (var miembro in tarea.Miembros)
                                         {
-                                            <span class="avatar" title="@miembro.NombreCompleto">@Iniciales(miembro.NombreCompleto)</span>
+                                            <partial name="_Avatar" model="(miembro.NombreCompleto, miembro.FotoPerfil, string.Empty)" />
                                         }
                                     </div>
                                     @if (puedeTrabajar && Model.Listas.Count > 1)

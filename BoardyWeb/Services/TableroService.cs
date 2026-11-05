@@ -10,10 +10,12 @@ namespace BoardyWeb.Services
     public class TableroService : ITableroService
     {
         private readonly AppDbContext _context;
+        private readonly IAuditoriaService _auditoria;
 
-        public TableroService(AppDbContext context)
+        public TableroService(AppDbContext context, IAuditoriaService auditoria)
         {
             _context = context;
+            _auditoria = auditoria;
         }
 
         public async Task<IReadOnlyList<TableroDto>> ListarDelUsuarioAsync(string usuarioId, CancellationToken cancellationToken = default)
@@ -110,6 +112,10 @@ namespace BoardyWeb.Services
             _context.Tableros.Add(tablero);
             await _context.SaveChangesAsync(cancellationToken);
 
+            // El id del tablero recién existe tras el primer guardado.
+            _auditoria.Registrar(tablero.TableroId, $"Creó el tablero \"{tablero.Nombre}\".");
+            await _context.SaveChangesAsync(cancellationToken);
+
             return ResultadoOperacion<TableroDto>.Exitoso(Mapear(tablero), "Tablero creado correctamente.");
         }
 
@@ -124,6 +130,7 @@ namespace BoardyWeb.Services
 
             tablero.Nombre = dto.Nombre.Trim();
             tablero.Descripcion = dto.Descripcion.Trim();
+            _auditoria.Registrar(tableroId, $"Editó el tablero \"{tablero.Nombre}\".");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion<TableroDto>.Exitoso(Mapear(tablero), "Tablero actualizado correctamente.");
@@ -203,6 +210,8 @@ namespace BoardyWeb.Services
             _context.MiembrosPorRol.RemoveRange(actual.Roles);
             actual.Roles.Add(new MiembrosPorRol { RolMiembroId = rolAdministrador.RolMiembroId, FechaAsignacion = ahora });
 
+            var nombreDestino = await _context.Users.Where(u => u.Id == destino.UsuarioId).Select(u => u.Nombre + " " + u.Apellido).FirstAsync(cancellationToken);
+            _auditoria.Registrar(tableroId, $"Transfirió la propiedad del tablero a {nombreDestino}.");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion.Exitoso("La propiedad del tablero fue transferida. Ahora tenés el rol Administrador.");

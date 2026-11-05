@@ -8,6 +8,21 @@
 <h2 class="h5 mb-3">Perfil</h2>
 <partial name="_StatusMessage" for="StatusMessage" />
 
+<div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+    <partial name="_Avatar" model='(Model.NombreCompleto, Model.FotoPerfil, "avatar-perfil")' />
+    <form method="post" enctype="multipart/form-data" asp-page-handler="Foto" class="d-flex flex-wrap gap-2">
+        <input type="file" name="foto" class="form-control" accept="image/jpeg,image/png,image/webp" aria-label="Foto de perfil" required style="max-width: 18rem;" />
+        <button type="submit" class="btn btn-outline-primary">Subir foto</button>
+    </form>
+    @if (Model.FotoPerfil is not null)
+    {
+        <form method="post" asp-page-handler="QuitarFoto">
+            <button type="submit" class="btn btn-outline-danger">Quitar</button>
+        </form>
+    }
+    <div class="form-text w-100 mt-0">JPG, PNG o WebP, hasta 2 MB.</div>
+</div>
+
 <form id="profile-form" method="post" style="max-width: 28rem;">
     <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
     <div class="mb-3">

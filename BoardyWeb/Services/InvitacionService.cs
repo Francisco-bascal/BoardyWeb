@@ -10,10 +10,12 @@ namespace BoardyWeb.Services
     public class InvitacionService : IInvitacionService
     {
         private readonly AppDbContext _context;
+        private readonly IAuditoriaService _auditoria;
 
-        public InvitacionService(AppDbContext context)
+        public InvitacionService(AppDbContext context, IAuditoriaService auditoria)
         {
             _context = context;
+            _auditoria = auditoria;
         }
 
         public async Task<IReadOnlyList<InvitacionTableroDto>> ListarRecibidasAsync(string usuarioId, CancellationToken cancellationToken = default)
@@ -84,6 +86,7 @@ namespace BoardyWeb.Services
             };
 
             _context.InvitacionTableros.Add(invitacion);
+            _auditoria.Registrar(tableroId, $"Invitó a {dto.Email} al tablero.");
             await _context.SaveChangesAsync(cancellationToken);
 
             var resultado = await Consultar()
@@ -135,6 +138,7 @@ namespace BoardyWeb.Services
                 }
             });
 
+            _auditoria.Registrar(invitacion.TableroId, "Aceptó la invitación al tablero.");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion.Exitoso("Invitación aceptada correctamente.");
@@ -152,6 +156,7 @@ namespace BoardyWeb.Services
             }
 
             invitacion!.Estado = EstadoInvitacion.Rechazada;
+            _auditoria.Registrar(invitacion.TableroId, "Rechazó la invitación al tablero.");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion.Exitoso("Invitación rechazada.");
@@ -169,6 +174,7 @@ namespace BoardyWeb.Services
             }
 
             invitacion!.Estado = EstadoInvitacion.Cancelada;
+            _auditoria.Registrar(invitacion.TableroId, "Canceló una invitación al tablero.");
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion.Exitoso("Invitación cancelada.");

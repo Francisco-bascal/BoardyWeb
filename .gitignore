@@ -366,3 +366,6 @@ FodyWeavers.xsd
 appsettings.json
 appsettings.*.json
 !appsettings.example.json
+
+# Fotos de perfil subidas por los usuarios
+BoardyWeb/wwwroot/uploads/
