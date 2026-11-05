@@ -30,6 +30,7 @@ namespace BoardyWeb.Autorizacion
                 return;
             }
 
+            //Se verifica si tiene el rol requerido para realizar una acción en el tablero
             var tieneRol = await _contexto.MiembrosPorRol.AnyAsync(m =>
                 m.TableroMiembro.TableroId == tableroId
                 && m.TableroMiembro.UsuarioId == usuarioId

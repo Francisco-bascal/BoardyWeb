@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Configuración local (cadenas de conexión y secretos): se versiona solo la plantilla
+appsettings.json
+appsettings.*.json
+!appsettings.example.json
