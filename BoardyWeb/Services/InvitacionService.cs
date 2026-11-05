@@ -3,6 +3,8 @@ using BoardyWeb.Comun;
 using BoardyWeb.Data;
 using BoardyWeb.DTOs;
 using BoardyWeb.Models;
+using System.Net;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace BoardyWeb.Services
@@ -11,11 +13,15 @@ namespace BoardyWeb.Services
     {
         private readonly AppDbContext _context;
         private readonly IAuditoriaService _auditoria;
+        private readonly IEmailSender _correo;
+        private readonly ILogger<InvitacionService> _logger;
 
-        public InvitacionService(AppDbContext context, IAuditoriaService auditoria)
+        public InvitacionService(AppDbContext context, IAuditoriaService auditoria, IEmailSender correo, ILogger<InvitacionService> logger)
         {
             _context = context;
             _auditoria = auditoria;
+            _correo = correo;
+            _logger = logger;
         }
 
         public async Task<IReadOnlyList<InvitacionTableroDto>> ListarRecibidasAsync(string usuarioId, CancellationToken cancellationToken = default)
@@ -93,6 +99,8 @@ namespace BoardyWeb.Services
                 .Where(i => i.InvitacionTableroId == invitacion.InvitacionTableroId)
                 .Select(Proyectar())
                 .FirstAsync(cancellationToken);
+
+            await AvisarPorCorreoAsync(dto.Email.Trim(), resultado);
 
             return ResultadoOperacion<InvitacionTableroDto>.Exitoso(resultado, "Invitación enviada correctamente.");
         }
@@ -178,6 +186,23 @@ namespace BoardyWeb.Services
             await _context.SaveChangesAsync(cancellationToken);
 
             return ResultadoOperacion.Exitoso("Invitación cancelada.");
+        }
+
+        // La invitación ya está guardada y se ve en la app: un fallo del correo no debe anularla.
+        private async Task AvisarPorCorreoAsync(string email, InvitacionTableroDto invitacion)
+        {
+            try
+            {
+                await _correo.SendEmailAsync(
+                    email,
+                    $"Te invitaron al tablero {invitacion.TableroNombre}",
+                    $"<p>{WebUtility.HtmlEncode(invitacion.UsuarioInvitadorNombre)} te invitó al tablero <strong>{WebUtility.HtmlEncode(invitacion.TableroNombre)}</strong>.</p>" +
+                    "<p>Ingresá a Boardy y entrá a <strong>Invitaciones</strong> para responder.</p>");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "No se pudo enviar el correo de la invitación {InvitacionId}.", invitacion.InvitacionTableroId);
+            }
         }
 
         private static ResultadoOperacion? ValidarPendiente(InvitacionTablero? invitacion)

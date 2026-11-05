@@ -92,6 +92,12 @@ Políticas: `VerTablero`, `ColaborarEnTablero`, `AdministrarTablero`, `Gestionar
 - **Foto de perfil**: en `wwwroot/uploads` (no versionada), hasta 2 MB, JPG/PNG/WebP validados por contenido.
 - **PDF** (QuestPDF, licencia Community): reporte del tablero, mis tareas y auditoría filtrada.
 
+## Correo y asistente
+
+- **Correo**: `CorreoSmtpService` implementa `IEmailSender` (confirmación, recuperación de contraseña y aviso de invitación).
+- **Asistente**: burbuja de chat con Gemini por REST. Solo explica el uso y resume las tareas pendientes del usuario, con opción de PDF; no tiene herramientas, así que no puede modificar datos. Límite: 20 preguntas por minuto por usuario.
+- **Configuración**: secciones `Smtp` y `Gemini` en `appsettings.Development.json` (no versionado). En el hosting, variables de entorno como `Smtp__Clave` y `Gemini__ApiKey`.
+
 ## Puesta en marcha
 
 1. Copiar `BoardyWeb/appsettings.example.json` como `appsettings.json` (no se versiona, está en `.gitignore`) y configurar la cadena de conexión `DefaultConnection`.
@@ -100,4 +106,4 @@ Políticas: `VerTablero`, `ColaborarEnTablero`, `AdministrarTablero`, `Gestionar
 
 ## Pendiente
 
-Adjuntos de archivos, SweetAlert2, envío real de correos de confirmación, pruebas automatizadas y mover credenciales y cadena de conexión a configuración segura.
+SweetAlert2, pruebas automatizadas y mover credenciales y cadena de conexión a configuración segura.

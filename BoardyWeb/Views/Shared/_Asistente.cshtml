@@ -1,0 +1,17 @@
+<button type="button" id="asistenteAbrir" class="btn btn-primary asistente-boton" aria-label="Abrir asistente" aria-expanded="false" title="Asistente">
+    <i class="bi bi-chat-dots"></i>
+</button>
+
+<section id="asistentePanel" class="asistente-panel" aria-label="Asistente" hidden>
+    <header class="d-flex justify-content-between align-items-center p-3 border-bottom">
+        <strong><i class="bi bi-stars me-2"></i>Asistente</strong>
+        <button type="button" id="asistenteCerrar" class="btn-close" aria-label="Cerrar"></button>
+    </header>
+    <div id="asistenteMensajes" class="asistente-mensajes" aria-live="polite">
+        <div class="asistente-mensaje asistente-respuesta">Hola. Puedo explicarte cómo usar Boardy y hacerte un reporte de tus tareas pendientes. No puedo hacer cambios por vos.</div>
+    </div>
+    <form id="asistenteFormulario" class="d-flex gap-2 p-3 border-top">
+        <input id="asistenteEntrada" class="form-control" maxlength="1000" placeholder="Escribí tu pregunta..." aria-label="Tu pregunta" autocomplete="off" required />
+        <button type="submit" class="btn btn-primary" aria-label="Enviar"><i class="bi bi-send"></i></button>
+    </form>
+</section>

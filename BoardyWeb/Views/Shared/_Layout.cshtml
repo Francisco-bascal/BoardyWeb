@@ -119,6 +119,11 @@
 
     <div class="toast-container position-fixed top-0 end-0 p-3" id="contenedorToasts"></div>
 
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <partial name="_Asistente" />
+    }
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation/dist/localization/messages_es.min.js" asp-append-version="true"></script>
@@ -127,6 +132,10 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/ajax-crud.js" asp-append-version="true"></script>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script src="~/js/asistente.js" asp-append-version="true"></script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

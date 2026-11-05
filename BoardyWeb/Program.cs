@@ -1,10 +1,14 @@
 using BoardyWeb.Autorizacion;
+using System.Threading.RateLimiting;
 using BoardyWeb.Comun;
+using BoardyWeb.Controllers;
 using BoardyWeb.Data;
 using BoardyWeb.Models;
 using BoardyWeb.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -60,6 +64,17 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
 builder.Services.AddScoped<IRegistroErrorService, RegistroErrorService>();
 builder.Services.AddScoped<IFotoPerfilService, FotoPerfilService>();
+builder.Services.AddTransient<IEmailSender, CorreoSmtpService>();
+builder.Services.AddHttpClient<IAsistenteService, AsistenteService>(cliente => cliente.Timeout = TimeSpan.FromSeconds(30));
+
+// Protege la cuota de la clave de Gemini: 20 preguntas por minuto por usuario.
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy(AsistenteController.PoliticaLimite, contexto => RateLimitPartition.GetFixedWindowLimiter(
+        contexto.User.Identity?.Name ?? "anonimo",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(1) }));
+});
 builder.Services.AddScoped<IReporteService, ReporteService>();
 
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
@@ -97,6 +112,7 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllerRoute(
     name: "default",

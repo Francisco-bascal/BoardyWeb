@@ -45,7 +45,7 @@ namespace BoardyWeb.Areas.Identity.Pages.Account
             // Mientras no haya un emisor de correo real configurado, el enlace de confirmación
             // se muestra en pantalla para poder completar el registro. Al configurar un
             // IEmailSender real, quitar este código y el enlace de la vista.
-            DisplayConfirmAccountLink = true;
+            DisplayConfirmAccountLink = false;
             if (DisplayConfirmAccountLink)
             {
                 var userId = await _userManager.GetUserIdAsync(user);
