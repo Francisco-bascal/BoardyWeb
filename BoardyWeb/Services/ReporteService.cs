@@ -5,8 +5,12 @@ using QuestPDF.Infrastructure;
 
 namespace BoardyWeb.Services
 {
+    /// <summary>
+    /// Genera los reportes PDF con QuestPDF.
+    /// </summary>
     public class ReporteService : IReporteService
     {
+        // PDF del tablero: una tabla de tareas por lista.
         public byte[] GenerarTablero(TableroDetalleDto tablero, IReadOnlyList<ListaTareaDto> listas, IReadOnlyList<TareaDto> tareas)
         {
             return Generar($"Tablero: {tablero.Nombre}", $"Propietario: {tablero.PropietarioNombre}", contenido =>
@@ -19,6 +23,7 @@ namespace BoardyWeb.Services
             });
         }
 
+        // PDF de las tareas asignadas al usuario, agrupadas por tablero.
         public byte[] GenerarMisTareas(string nombreUsuario, IReadOnlyList<TareaDto> tareas)
         {
             return Generar("Mis tareas", nombreUsuario, contenido =>
@@ -31,6 +36,7 @@ namespace BoardyWeb.Services
             });
         }
 
+        // PDF de las acciones de auditoría recibidas.
         public byte[] GenerarAuditoria(string nombreTablero, IReadOnlyList<RegistroAuditoriaDto> registros)
         {
             return Generar($"Auditoría: {nombreTablero}", $"{registros.Count} acciones", contenido =>
@@ -40,6 +46,7 @@ namespace BoardyWeb.Services
             });
         }
 
+        // Arma las columnas de una tabla de tareas.
         private static void TablaTareas(ColumnDescriptor contenido, IEnumerable<TareaDto> tareas)
         {
             Tabla(contenido, new[] { "Tarea", "Estado", "Prioridad", "Vence", "Asignados" }, new float[] { 4, 2, 1.5f, 1.5f, 3 },
@@ -53,6 +60,7 @@ namespace BoardyWeb.Services
                 }));
         }
 
+        // Dibuja una tabla genérica con encabezados, anchos y filas.
         private static void Tabla(ColumnDescriptor contenido, string[] encabezados, float[] anchos, IEnumerable<string[]> filas)
         {
             contenido.Item().PaddingTop(4).Table(tabla =>
@@ -80,6 +88,7 @@ namespace BoardyWeb.Services
             });
         }
 
+        // Plantilla común: página A4, encabezado, contenido y numeración.
         private static byte[] Generar(string titulo, string subtitulo, Action<ColumnDescriptor> contenido)
         {
             return Document.Create(documento => documento.Page(pagina =>

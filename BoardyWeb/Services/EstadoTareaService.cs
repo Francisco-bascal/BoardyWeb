@@ -53,6 +53,7 @@ namespace BoardyWeb.Services
         {
             var nombre = dto.Nombre.Trim();
 
+            // Regla de nombre único: no puede haber dos estados con el mismo nombre.
             if (await _context.EstadoTareas.AnyAsync(e => e.Nombre == nombre, cancellationToken))
             {
                 return ResultadoOperacion<EstadoTareaDto>.Fallo(nameof(dto.Nombre), "Ya existe un estado con ese nombre.");
@@ -76,11 +77,13 @@ namespace BoardyWeb.Services
 
             var nombre = dto.Nombre.Trim();
 
+            // No renombrado de estados del sistema: Kanban depende de esos nombres.
             if (nombre != estado.Nombre && EstadosTareaSistema.Todos.Contains(estado.Nombre))
             {
                 return ResultadoOperacion<EstadoTareaDto>.Fallo(nameof(dto.Nombre), "No se puede renombrar un estado del sistema.");
             }
 
+            // Regla de nombre único: no puede haber dos estados con el mismo nombre.
             if (await _context.EstadoTareas.AnyAsync(e => e.Nombre == nombre && e.EstadoTareaId != estadoTareaId, cancellationToken))
             {
                 return ResultadoOperacion<EstadoTareaDto>.Fallo(nameof(dto.Nombre), "Ya existe un estado con ese nombre.");
@@ -103,16 +106,19 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion.NoExiste("El estado de tarea no existe.");
             }
 
+            // No eliminación de estados del sistema: Kanban depende de ellos.
             if (EstadosTareaSistema.Todos.Contains(estado.Nombre))
             {
                 return ResultadoOperacion.Fallo("No se puede eliminar un estado del sistema.");
             }
 
+            // No eliminación de estados en listas: no puede estar vinculado a una lista.
             if (await _context.ListaTareas.AnyAsync(l => l.EstadoTareaId == estadoTareaId, cancellationToken))
             {
                 return ResultadoOperacion.Fallo("No se puede eliminar un estado vinculado a listas.");
             }
 
+            // No eliminación de estados en uso: no puede tener tareas asociadas.
             if (await _context.Tareas.AnyAsync(t => t.EstadoTareaId == estadoTareaId, cancellationToken))
             {
                 return ResultadoOperacion.Fallo("No se puede eliminar un estado que tiene tareas asociadas.");

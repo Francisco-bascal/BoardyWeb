@@ -75,6 +75,7 @@ namespace BoardyWeb.Services
             // Si la lista tiene estado (Kanban) manda la lista, no el formulario.
             var estadoTareaId = lista.EstadoTareaId ?? dto.EstadoTareaId;
 
+            // Regla de estado existente: el estado de la tarea debe estar en el catálogo.
             if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == estadoTareaId, cancellationToken))
             {
                 return ResultadoOperacion<TareaDto>.Fallo(nameof(dto.EstadoTareaId), "El estado seleccionado no existe.");
@@ -113,8 +114,10 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion<TareaDto>.NoExiste("La tarea no existe.");
             }
 
+            // Regla de estado Kanban: si la lista tiene estado, manda la lista y no el formulario.
             var estadoTareaId = tarea.ListaTarea.EstadoTareaId ?? dto.EstadoTareaId;
 
+            // Regla de estado existente: el estado de la tarea debe estar en el catálogo.
             if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == estadoTareaId, cancellationToken))
             {
                 return ResultadoOperacion<TareaDto>.Fallo(nameof(dto.EstadoTareaId), "El estado seleccionado no existe.");
@@ -151,6 +154,7 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion<TareaDto>.NoExiste("La lista de destino no existe.");
             }
 
+            // No movimiento entre tableros: la lista de destino debe ser del mismo tablero.
             if (listaDestino.TableroId != tarea.ListaTarea.TableroId)
             {
                 return ResultadoOperacion<TareaDto>.Fallo(nameof(dto.ListaTareaId), "La lista de destino pertenece a otro tablero.");
@@ -166,6 +170,7 @@ namespace BoardyWeb.Services
             var posicion = Math.Min(dto.NuevoOrden ?? tareasDestino.Count + 1, tareasDestino.Count + 1);
             tareasDestino.Insert(posicion - 1, tarea);
             tarea.ListaTareaId = dto.ListaTareaId;
+            // Regla de sincronización Kanban: mover a una lista con estado cambia el estado de la tarea.
             tarea.EstadoTareaId = listaDestino.EstadoTareaId ?? tarea.EstadoTareaId;
             Renumerar(tareasDestino);
 
@@ -210,6 +215,7 @@ namespace BoardyWeb.Services
                     : await MoverAsync(tareaId, new MoverTareaDto { ListaTareaId = listaDestinoId.Value }, cancellationToken);
             }
 
+            // Regla de estado existente: el estado de la tarea debe estar en el catálogo.
             if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == dto.EstadoTareaId, cancellationToken))
             {
                 return ResultadoOperacion<TareaDto>.Fallo(nameof(dto.EstadoTareaId), "El estado seleccionado no existe.");
@@ -232,11 +238,13 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion<TareaDto>.NoExiste("La tarea no existe.");
             }
 
+            // Regla de encargado miembro: debe pertenecer al tablero de la tarea.
             if (!await _context.TableroMiembros.AnyAsync(m => m.TableroMiembroId == tableroMiembroId && m.TableroId == tableroId, cancellationToken))
             {
                 return ResultadoOperacion<TareaDto>.Fallo("El miembro no pertenece al tablero de la tarea.");
             }
 
+            // No asignación duplicada: el miembro no puede estar ya asignado.
             if (await _context.TareaMiembros.AnyAsync(m => m.TareaId == tareaId && m.TableroMiembroId == tableroMiembroId, cancellationToken))
             {
                 return ResultadoOperacion<TareaDto>.Fallo("El miembro ya está asignado a la tarea.");

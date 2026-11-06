@@ -18,6 +18,7 @@ namespace BoardyWeb.Autorizacion
             _contexto = contexto;
         }
 
+        // Autoriza si el usuario tiene en el tablero alguno de los roles permitidos.
         protected override async Task HandleRequirementAsync(
             AuthorizationHandlerContext contextoAutorizacion,
             RolTableroRequirement requisito,

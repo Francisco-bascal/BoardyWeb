@@ -99,6 +99,7 @@ namespace BoardyWeb.Areas.Identity.Pages.Account.Manage
             return Page();
         }
 
+        // Envía al correo nuevo el enlace para confirmar el cambio.
         public async Task<IActionResult> OnPostChangeEmailAsync()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -137,6 +138,7 @@ namespace BoardyWeb.Areas.Identity.Pages.Account.Manage
             return RedirectToPage();
         }
 
+        // Reenvía el enlace de verificación del correo actual.
         public async Task<IActionResult> OnPostSendVerificationEmailAsync()
         {
             var user = await _userManager.GetUserAsync(User);

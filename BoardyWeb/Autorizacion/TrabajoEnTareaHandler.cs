@@ -17,6 +17,7 @@ namespace BoardyWeb.Autorizacion
             _contexto = contexto;
         }
 
+        // Autoriza a Propietario y Administrador, o al Operario asignado a la tarea.
         protected override async Task HandleRequirementAsync(
             AuthorizationHandlerContext contextoAutorizacion,
             TrabajoEnTareaRequirement requisito,

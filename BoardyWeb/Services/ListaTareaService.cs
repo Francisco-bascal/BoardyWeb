@@ -109,6 +109,7 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion<ListaTareaDto>.Fallo(nameof(dto.EstadoTareaId), error);
             }
 
+            // Regla de sincronización Kanban: si cambia el estado de la lista, cambia el de sus tareas.
             if (estadoTareaId is not null && estadoTareaId != lista.EstadoTareaId)
             {
                 var tareas = await _context.Tareas.Where(t => t.ListaTareaId == listaTareaId).ToListAsync(cancellationToken);
@@ -161,6 +162,7 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion.NoExiste("La lista no existe.");
             }
 
+            // No eliminación de listas con tareas: primero hay que vaciarla.
             if (await _context.Tareas.AnyAsync(t => t.ListaTareaId == listaTareaId, cancellationToken))
             {
                 return ResultadoOperacion.Fallo("No se puede eliminar una lista que contiene tareas.");
@@ -181,11 +183,13 @@ namespace BoardyWeb.Services
                 return (null, null);
             }
 
+            // Regla de estado obligatorio: en Kanban cada lista necesita un estado válido.
             if (estadoTareaId is null || !await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == estadoTareaId, cancellationToken))
             {
                 return (null, "Debés seleccionar un estado.");
             }
 
+            // Regla de estado único: no puede haber dos listas con el mismo estado en el tablero.
             if (await _context.ListaTareas.AnyAsync(l => l.TableroId == tableroId && l.EstadoTareaId == estadoTareaId && l.ListaTareaId != listaTareaId, cancellationToken))
             {
                 return (null, "Ya existe una lista para ese estado.");

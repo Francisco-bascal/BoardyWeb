@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace BoardyWeb.Controllers
 {
+    /// <summary>
+    /// Recibe las preguntas del chat y limita la cantidad por usuario.
+    /// </summary>
     public class AsistenteController : ControladorBase
     {
         public const string PoliticaLimite = "asistente";
@@ -17,6 +20,7 @@ namespace BoardyWeb.Controllers
             _asistenteService = asistenteService;
         }
 
+        // Responde una pregunta; el límite de uso se define en Program.cs.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [EnableRateLimiting(PoliticaLimite)]

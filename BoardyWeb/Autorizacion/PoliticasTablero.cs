@@ -7,16 +7,16 @@ namespace BoardyWeb.Autorizacion
     /// </summary>
     public static class PoliticasTablero
     {
-        /// <summary>Cualquier miembro del tablero (Lector o superior).</summary>
+        // Cualquier miembro del tablero (Lector o superior).
         public const string VerTablero = nameof(VerTablero);
 
-        /// <summary>Operario o superior: cambiar estado, etiquetar y comentar.</summary>
+        // Operario o superior: cambiar estado, etiquetar y comentar.
         public const string ColaborarEnTablero = nameof(ColaborarEnTablero);
 
-        /// <summary>Administrador o superior: crear y administrar listas, tareas y miembros.</summary>
+        // Administrador o superior: crear y administrar listas, tareas y miembros.
         public const string AdministrarTablero = nameof(AdministrarTablero);
 
-        /// <summary>Solo el Propietario: editar o eliminar el tablero.</summary>
+        // Solo el Propietario: editar o eliminar el tablero.
         public const string GestionarTablero = nameof(GestionarTablero);
     }
 }

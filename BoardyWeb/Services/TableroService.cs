@@ -67,6 +67,7 @@ namespace BoardyWeb.Services
                 .Select(r => (int?)r.RolMiembroId)
                 .FirstOrDefaultAsync(cancellationToken);
 
+            // Regla de propietario inicial: quien crea el tablero es su Propietario, y el rol debe existir.
             if (rolPropietarioId is null)
             {
                 return ResultadoOperacion<TableroDto>.Fallo("No está configurado el rol Propietario.");
@@ -87,6 +88,7 @@ namespace BoardyWeb.Services
                     .Where(e => EstadosTareaSistema.Todos.Contains(e.Nombre))
                     .ToDictionaryAsync(e => e.Nombre, e => e.EstadoTareaId, cancellationToken);
 
+                // Regla de esquema Kanban: arranca con una lista por cada estado del sistema.
                 if (estados.Count != EstadosTareaSistema.Todos.Length)
                 {
                     return ResultadoOperacion<TableroDto>.Fallo("No están configurados los estados de tarea de Kanban.");
@@ -161,6 +163,7 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion.NoExiste("El tablero no existe.");
             }
 
+            // Regla de transferencia: solo el propietario puede ceder la propiedad.
             if (tablero.PropietarioId != usuarioActualId)
             {
                 return ResultadoOperacion.Prohibido("Solo el propietario puede transferir la propiedad del tablero.");
@@ -170,16 +173,19 @@ namespace BoardyWeb.Services
                 .Include(m => m.Roles).ThenInclude(r => r.RolMiembro)
                 .FirstOrDefaultAsync(m => m.TableroMiembroId == tableroMiembroDestinoId && m.TableroId == tableroId, cancellationToken);
 
+            // Regla de destino miembro: debe pertenecer al tablero.
             if (destino is null)
             {
                 return ResultadoOperacion.NoExiste("El miembro no pertenece al tablero.");
             }
 
+            // No transferencia a sí mismo: el destino no puede ser ya el propietario.
             if (destino.UsuarioId == tablero.PropietarioId)
             {
                 return ResultadoOperacion.Fallo("Ese usuario ya es el propietario del tablero.");
             }
 
+            // Regla de destino Administrador: solo se transfiere a un miembro con ese rol.
             if (!destino.Roles.Any(r => r.RolMiembro.Nombre == RolesTablero.Administrador))
             {
                 return ResultadoOperacion.Fallo("Solo se puede transferir la propiedad a un miembro con el rol Administrador.");

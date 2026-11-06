@@ -65,16 +65,19 @@ namespace BoardyWeb.Services
                 .Select(u => u.Id)
                 .FirstOrDefaultAsync(cancellationToken);
 
+            // Regla de usuario activo: solo se invita a un usuario existente y activo.
             if (usuarioInvitadoId is null)
             {
                 return ResultadoOperacion<InvitacionTableroDto>.Fallo(nameof(dto.Email), "No existe un usuario activo con ese email.");
             }
 
+            // No invitación de miembros: el usuario no puede pertenecer ya al tablero.
             if (await _context.TableroMiembros.AnyAsync(m => m.TableroId == tableroId && m.UsuarioId == usuarioInvitadoId, cancellationToken))
             {
                 return ResultadoOperacion<InvitacionTableroDto>.Fallo(nameof(dto.Email), "El usuario ya es miembro del tablero.");
             }
 
+            // Regla de invitación única: no puede tener otra pendiente en el tablero.
             if (await _context.InvitacionTableros.AnyAsync(i =>
                     i.TableroId == tableroId && i.UsuarioInvitadoId == usuarioInvitadoId && i.Estado == EstadoInvitacion.Pendiente, cancellationToken))
             {
@@ -122,11 +125,13 @@ namespace BoardyWeb.Services
                 .Select(r => (int?)r.RolMiembroId)
                 .FirstOrDefaultAsync(cancellationToken);
 
+            // Regla de rol inicial: quien acepta entra como Lector, y ese rol debe existir.
             if (rolLectorId is null)
             {
                 return ResultadoOperacion.Fallo("No está configurado el rol Lector.");
             }
 
+            // No aceptación duplicada: el usuario no puede ser ya miembro.
             if (await _context.TableroMiembros.AnyAsync(m => m.TableroId == invitacion!.TableroId && m.UsuarioId == usuarioId, cancellationToken))
             {
                 return ResultadoOperacion.Fallo("Ya sos miembro de este tablero.");
@@ -206,6 +211,7 @@ namespace BoardyWeb.Services
             }
         }
 
+        // Regla de invitación pendiente: solo se responde o cancela si sigue pendiente.
         private static ResultadoOperacion? ValidarPendiente(InvitacionTablero? invitacion)
         {
             if (invitacion is null)

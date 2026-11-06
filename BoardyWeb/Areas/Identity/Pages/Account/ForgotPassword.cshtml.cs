@@ -51,11 +51,13 @@ namespace BoardyWeb.Areas.Identity.Pages.Account
             public string Email { get; set; }
         }
 
+        // Genera el enlace de recuperación de contraseña y lo envía por correo.
         public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(Input.Email);
+                // Regla de no revelación: responde igual si el correo no existe o no está confirmado.
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
                     // Don't reveal that the user does not exist or is not confirmed
@@ -64,6 +66,7 @@ namespace BoardyWeb.Areas.Identity.Pages.Account
 
                 // For more information on how to enable account confirmation and password reset please
                 // visit https://go.microsoft.com/fwlink/?LinkID=532713
+                // Token de un solo uso atado al usuario.
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var callbackUrl = Url.Page(

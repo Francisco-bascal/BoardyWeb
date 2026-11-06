@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BoardyWeb.Services
 {
+    /// <summary>
+    /// Registra y consulta las acciones realizadas en cada tablero.
+    /// </summary>
     public class AuditoriaService : IAuditoriaService
     {
         private readonly AppDbContext _context;
@@ -19,6 +22,7 @@ namespace BoardyWeb.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
+        // Agrega la acción sin guardar: se persiste con el SaveChanges de la operación.
         public void Registrar(int tableroId, string accion)
         {
             var usuarioId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -37,6 +41,7 @@ namespace BoardyWeb.Services
             });
         }
 
+        // Lista paginada para la pantalla de auditoría.
         public async Task<Pagina<RegistroAuditoriaDto>> ListarAsync(int tableroId, string? usuarioId, int pagina, CancellationToken cancellationToken = default)
         {
             var numero = Math.Max(1, pagina);
@@ -55,6 +60,7 @@ namespace BoardyWeb.Services
             };
         }
 
+        // Lista completa para el PDF.
         public async Task<IReadOnlyList<RegistroAuditoriaDto>> ListarTodoAsync(int tableroId, string? usuarioId, CancellationToken cancellationToken = default)
         {
             return await Filtrar(tableroId, usuarioId)
@@ -63,6 +69,7 @@ namespace BoardyWeb.Services
                 .ToListAsync(cancellationToken);
         }
 
+        // Filtra por tablero y, si se indicó, por usuario.
         private IQueryable<RegistroAuditoria> Filtrar(int tableroId, string? usuarioId)
         {
             return _context.RegistrosAuditoria

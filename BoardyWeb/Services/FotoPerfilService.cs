@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BoardyWeb.Services
 {
+    /// <summary>
+    /// Guarda y quita la foto de perfil en wwwroot/uploads.
+    /// </summary>
     public class FotoPerfilService : IFotoPerfilService
     {
         private const long TamanioMaximo = 2 * 1024 * 1024;
@@ -19,8 +22,10 @@ namespace BoardyWeb.Services
             _entorno = entorno;
         }
 
+        // Valida la foto, la guarda con nombre aleatorio y actualiza al usuario.
         public async Task<ResultadoOperacion> GuardarAsync(Usuario usuario, IFormFile archivo, CancellationToken cancellationToken = default)
         {
+            // Regla de tamaño: el archivo no puede estar vacío ni superar 2 MB.
             if (archivo.Length == 0 || archivo.Length > TamanioMaximo)
             {
                 return ResultadoOperacion.Fallo("La foto debe pesar como máximo 2 MB.");
@@ -31,6 +36,7 @@ namespace BoardyWeb.Services
             await origen.ReadAtLeastAsync(firma, BytesFirma, throwOnEndOfStream: false, cancellationToken);
 
             var extension = ObtenerExtension(firma);
+            // Regla de formato: solo se acepta JPG, PNG o WebP según su contenido.
             if (extension is null)
             {
                 return ResultadoOperacion.Fallo("La foto debe ser JPG, PNG o WebP.");
@@ -49,11 +55,13 @@ namespace BoardyWeb.Services
             return await ActualizarAsync(usuario, $"/{Carpeta}/{nombre}", "Foto de perfil actualizada.");
         }
 
+        // Deja al usuario sin foto y borra el archivo.
         public Task<ResultadoOperacion> QuitarAsync(Usuario usuario)
         {
             return ActualizarAsync(usuario, null, "Foto de perfil eliminada.");
         }
 
+        // Guarda la nueva ruta y, si salió bien, borra el archivo anterior.
         private async Task<ResultadoOperacion> ActualizarAsync(Usuario usuario, string? nuevaFoto, string mensaje)
         {
             var anterior = usuario.FotoPerfil;

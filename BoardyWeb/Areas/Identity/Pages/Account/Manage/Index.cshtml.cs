@@ -116,6 +116,7 @@ namespace BoardyWeb.Areas.Identity.Pages.Account.Manage
             return RedirectToPage();
         }
 
+        // Verifica la contraseña, elimina la cuenta y cierra la sesión.
         public async Task<IActionResult> OnPostEliminarCuentaAsync(string clave)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -141,6 +142,7 @@ namespace BoardyWeb.Areas.Identity.Pages.Account.Manage
             return Redirect("~/");
         }
 
+        // Quita la foto de perfil del usuario.
         public async Task<IActionResult> OnPostQuitarFotoAsync()
         {
             var user = await _userManager.GetUserAsync(User);

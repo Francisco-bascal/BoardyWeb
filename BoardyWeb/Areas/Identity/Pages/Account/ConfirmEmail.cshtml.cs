@@ -22,6 +22,7 @@ namespace BoardyWeb.Areas.Identity.Pages.Account
         [TempData]
         public string StatusMessage { get; set; }
 
+        // Valida el token del enlace y confirma la cuenta.
         public async Task<IActionResult> OnGetAsync(string userId, string code)
         {
             if (userId == null || code == null)

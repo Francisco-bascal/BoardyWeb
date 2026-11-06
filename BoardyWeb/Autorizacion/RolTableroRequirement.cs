@@ -7,6 +7,7 @@ namespace BoardyWeb.Autorizacion
     /// </summary>
     public class RolTableroRequirement : IAuthorizationRequirement
     {
+        // Recibe los roles que cumplen el requisito.
         public RolTableroRequirement(params string[] rolesPermitidos)
         {
             RolesPermitidos = rolesPermitidos;

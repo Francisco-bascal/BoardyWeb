@@ -16,6 +16,7 @@ namespace BoardyWeb.Services
             _configuracion = configuracion;
         }
 
+        // Lee la sección Smtp de la configuración y envía el correo HTML con SSL.
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
             var smtp = _configuracion.GetSection("Smtp");

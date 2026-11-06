@@ -15,22 +15,21 @@ namespace BoardyWeb.Controllers
             _autorizacion = autorizacion;
         }
 
+        // Evalúa una política sobre un tablero.
         protected async Task<bool> TienePermisoAsync(int tableroId, string politica)
         {
             var resultado = await _autorizacion.AuthorizeAsync(User, tableroId, politica);
             return resultado.Succeeded;
         }
 
+        // Evalúa una política sobre una tarea.
         protected async Task<bool> TienePermisoSobreTareaAsync(int tareaId, string politica)
         {
             var resultado = await _autorizacion.AuthorizeAsync(User, tareaId, politica);
             return resultado.Succeeded;
         }
 
-        /// <summary>
-        /// Devuelve 404 si el tablero no pudo resolverse, 403 si el usuario no cumple la política;
-        /// null si puede continuar.
-        /// </summary>
+        // Devuelve 404 si el tablero no existe, 403 sin permiso y null si puede continuar.
         protected async Task<IActionResult?> ValidarAccesoAsync(int? tableroId, string politica)
         {
             if (tableroId is null)

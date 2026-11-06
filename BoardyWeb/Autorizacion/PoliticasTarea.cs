@@ -6,10 +6,7 @@ namespace BoardyWeb.Autorizacion
     /// </summary>
     public static class PoliticasTarea
     {
-        /// <summary>
-        /// Mover la tarea, cambiar su estado y gestionar sus etiquetas: Propietario y Administrador en
-        /// cualquier tarea; Operario solo en las tareas a las que está asignado.
-        /// </summary>
+        // Mover, cambiar estado y etiquetar: Propietario y Administrador siempre; Operario si está asignado.
         public const string TrabajarEnTarea = nameof(TrabajarEnTarea);
     }
 }

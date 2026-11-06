@@ -90,6 +90,7 @@ namespace BoardyWeb.Areas.Identity.Pages.Account
             }
         }
 
+        // Valida el token del enlace y guarda la nueva contraseña.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)

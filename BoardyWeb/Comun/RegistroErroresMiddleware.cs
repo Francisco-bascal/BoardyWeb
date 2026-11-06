@@ -20,6 +20,7 @@ namespace BoardyWeb.Comun
             _logger = logger;
         }
 
+        // Ejecuta la petición y, ante una excepción, la registra y la relanza.
         public async Task InvokeAsync(HttpContext contexto)
         {
             try
@@ -33,6 +34,7 @@ namespace BoardyWeb.Comun
             }
         }
 
+        // Guarda el error sin dejar que un fallo al guardar oculte el original.
         private async Task GuardarAsync(HttpContext contexto, Exception excepcion)
         {
             try

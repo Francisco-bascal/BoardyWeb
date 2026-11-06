@@ -56,6 +56,7 @@ namespace BoardyWeb.Areas.Identity.Pages.Account
         {
         }
 
+        // Genera y reenvía el enlace de confirmación.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)

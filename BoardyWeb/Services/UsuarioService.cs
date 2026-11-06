@@ -90,12 +90,14 @@ namespace BoardyWeb.Services
 
         public async Task<ResultadoOperacion> EliminarCuentaAsync(Usuario usuario, CancellationToken cancellationToken = default)
         {
+            // No eliminación de propietario: primero debe transferir o eliminar sus tableros.
             if (await _context.Tableros.AnyAsync(t => t.PropietarioId == usuario.Id, cancellationToken))
             {
                 return ResultadoOperacion.Fallo("Sos propietario de al menos un tablero: transferí la propiedad o eliminalo antes de borrar tu cuenta.");
             }
 
             var esAdministrador = await _userManager.IsInRoleAsync(usuario, RolesGlobales.Administrador);
+            // Regla de no eliminación de único Administrador: la plataforma debe conservar uno.
             if (esAdministrador && (await _userManager.GetUsersInRoleAsync(RolesGlobales.Administrador)).Count == 1)
             {
                 return ResultadoOperacion.Fallo("Sos el único administrador de la plataforma: asigná otro antes de borrar tu cuenta.");
@@ -117,6 +119,7 @@ namespace BoardyWeb.Services
                 await _userManager.RemoveFromRoleAsync(usuario, RolesGlobales.Administrador);
             }
 
+            // Regla de anonimización: se conservan comentarios y auditoría como "Usuario eliminado".
             usuario.Nombre = "Usuario";
             usuario.Apellido = "eliminado";
             usuario.UserName = $"eliminado-{Guid.NewGuid():N}";
@@ -136,6 +139,7 @@ namespace BoardyWeb.Services
 
         private async Task<(Usuario? Usuario, ResultadoOperacion? Error)> ObtenerOtroUsuarioAsync(string usuarioId, string usuarioActualId)
         {
+            // No modificación de usuario propio: no podés desactivarte ni cambiar tu rol global.
             if (usuarioId == usuarioActualId)
             {
                 return (null, ResultadoOperacion.Fallo("No podés aplicar esta acción sobre tu propia cuenta."));

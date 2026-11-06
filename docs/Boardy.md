@@ -92,18 +92,22 @@ Políticas: `VerTablero`, `ColaborarEnTablero`, `AdministrarTablero`, `Gestionar
 - **Foto de perfil**: en `wwwroot/uploads` (no versionada), hasta 2 MB, JPG/PNG/WebP validados por contenido.
 - **PDF** (QuestPDF, licencia Community): reporte del tablero, mis tareas y auditoría filtrada.
 
+## Eliminar la cuenta propia
+
+En Mi cuenta → Perfil, con contraseña. Se rechaza si el usuario es propietario de un tablero o el único administrador global. La cuenta se anonimiza: sus comentarios y su auditoría quedan como "Usuario eliminado" y el correo queda libre.
+
 ## Correo y asistente
 
-- **Correo**: `CorreoSmtpService` implementa `IEmailSender` (confirmación, recuperación de contraseña y aviso de invitación).
+- **Correo**: `CorreoSmtpService` implementa `IEmailSender` (confirmación, recuperación de contraseña y aviso de invitación). El aviso de invitación se envía en segundo plano: un fallo no anula la invitación y solo queda en el log de la aplicación.
 - **Asistente**: burbuja de chat con Gemini por REST. Solo explica el uso y resume las tareas pendientes del usuario, con opción de PDF; no tiene herramientas, así que no puede modificar datos. Límite: 20 preguntas por minuto por usuario.
 - **Configuración**: secciones `Smtp` y `Gemini` en `appsettings.Development.json` (no versionado). En el hosting, variables de entorno como `Smtp__Clave` y `Gemini__ApiKey`.
 
 ## Puesta en marcha
 
-1. Copiar `BoardyWeb/appsettings.example.json` como `appsettings.json` (no se versiona, está en `.gitignore`) y configurar la cadena de conexión `DefaultConnection`.
+1. Crear `BoardyWeb/appsettings.Development.json` (no se versiona, está en `.gitignore`) con `ConnectionStrings:DefaultConnection` y las secciones `Smtp` y `Gemini`.
 2. Ejecutar `dotnet run` dentro de `BoardyWeb/`: aplica las migraciones y siembra roles, estados de tarea, un usuario administrador y un tablero de demostración.
 3. Usuario semilla: `admin@boardy.local` (la contraseña está definida en `Data/DbSeeder.cs`; conviene moverla a configuración antes de publicar).
 
 ## Pendiente
 
-SweetAlert2, pruebas automatizadas y mover credenciales y cadena de conexión a configuración segura.
+SweetAlert2, pruebas automatizadas y sacar del código la contraseña del usuario semilla.

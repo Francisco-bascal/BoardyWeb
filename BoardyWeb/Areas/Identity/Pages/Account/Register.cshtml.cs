@@ -125,6 +125,7 @@ namespace BoardyWeb.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
+        // Crea el usuario y envía el enlace de confirmación de cuenta.
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
@@ -149,6 +150,7 @@ namespace BoardyWeb.Areas.Identity.Pages.Account
                     await _userManager.AddToRoleAsync(user, "Operador");
 
                     var userId = await _userManager.GetUserIdAsync(user);
+                    // Token que valida ConfirmEmail.
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(

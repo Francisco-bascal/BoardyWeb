@@ -32,11 +32,13 @@ namespace BoardyWeb.Services
                 .Select(u => u.Id)
                 .FirstOrDefaultAsync(cancellationToken);
 
+            // Regla de usuario activo: solo se agrega a un usuario existente y activo.
             if (usuarioId is null)
             {
                 return ResultadoOperacion<TableroMiembroDto>.Fallo(nameof(dto.Email), "No existe un usuario activo con ese email.");
             }
 
+            // No duplicación de miembros: el usuario no puede pertenecer ya al tablero.
             if (await _context.TableroMiembros.AnyAsync(m => m.TableroId == tableroId && m.UsuarioId == usuarioId, cancellationToken))
             {
                 return ResultadoOperacion<TableroMiembroDto>.Fallo(nameof(dto.Email), "El usuario ya es miembro del tablero.");
@@ -78,11 +80,13 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion<TableroMiembroDto>.NoExiste("El miembro no existe en el tablero.");
             }
 
+            // No cambio de rol del propietario: debe transferir la propiedad.
             if (await EsPropietarioAsync(tableroId, miembro.UsuarioId, cancellationToken))
             {
                 return ResultadoOperacion<TableroMiembroDto>.Fallo("No se puede cambiar el rol del propietario. Transferí la propiedad para dejar de serlo.");
             }
 
+            // No reasignación del mismo rol: el rol nuevo debe ser distinto.
             if (miembro.Roles.Any(r => r.RolMiembroId == dto.RolMiembroId))
             {
                 return ResultadoOperacion<TableroMiembroDto>.Fallo(nameof(dto.RolMiembroId), "El miembro ya tiene ese rol.");
@@ -116,6 +120,7 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion.NoExiste("El miembro no existe en el tablero.");
             }
 
+            // No expulsión del propietario: el tablero siempre conserva a su dueño.
             if (await EsPropietarioAsync(tableroId, miembro.UsuarioId, cancellationToken))
             {
                 return ResultadoOperacion.Fallo("No se puede quitar al propietario del tablero.");
@@ -175,11 +180,13 @@ namespace BoardyWeb.Services
                 .Select(r => r.Nombre)
                 .FirstOrDefaultAsync(cancellationToken);
 
+            // Regla de rol existente: el rol elegido debe estar en el catálogo.
             if (nombreRol is null)
             {
                 return "El rol seleccionado no existe.";
             }
 
+            // No asignación de Propietario: ese rol solo se obtiene por transferencia.
             return nombreRol == RolesTablero.Propietario ? "El rol Propietario no puede asignarse a otros miembros." : null;
         }
     }

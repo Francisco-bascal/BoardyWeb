@@ -62,6 +62,7 @@ namespace BoardyWeb.Services
         {
             var nombre = dto.Nombre.Trim();
 
+            // Regla de nombre único: no puede haber dos roles con el mismo nombre.
             if (await _context.RolMiembros.AnyAsync(e => e.Nombre == nombre, cancellationToken))
             {
                 return ResultadoOperacion<RolMiembroDto>.Fallo(nameof(dto.Nombre), "Ya existe un rol con ese nombre.");
@@ -85,6 +86,7 @@ namespace BoardyWeb.Services
 
             var nombre = dto.Nombre.Trim();
 
+            // Regla de nombre único: no puede haber dos roles con el mismo nombre.
             if (await _context.RolMiembros.AnyAsync(e => e.Nombre == nombre && e.RolMiembroId != rolMiembroId, cancellationToken))
             {
                 return ResultadoOperacion<RolMiembroDto>.Fallo(nameof(dto.Nombre), "Ya existe un rol con ese nombre.");
@@ -107,11 +109,13 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion.NoExiste("El rol de miembro no existe.");
             }
 
+            // No eliminación de roles del sistema: los permisos dependen de ellos.
             if (RolesDelSistema.Contains(rol.Nombre))
             {
                 return ResultadoOperacion.Fallo("No se puede eliminar un rol utilizado por el sistema.");
             }
 
+            // No eliminación de roles en uso: no puede tener miembros asignados.
             if (await _context.MiembrosPorRol.AnyAsync(t => t.RolMiembroId == rolMiembroId, cancellationToken))
             {
                 return ResultadoOperacion.Fallo("No se puede eliminar un rol que tiene miembros asignados.");

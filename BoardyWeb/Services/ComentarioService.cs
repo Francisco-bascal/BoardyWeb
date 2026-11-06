@@ -87,6 +87,7 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion.NoExiste("El comentario no existe.");
             }
 
+            // Regla de autoría: solo elimina el autor o quien puede moderar el tablero.
             if (comentario.UsuarioId != usuarioId && !puedeModerar)
             {
                 return ResultadoOperacion.Prohibido("Solo el autor puede eliminar el comentario.");

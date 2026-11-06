@@ -52,6 +52,7 @@ namespace BoardyWeb.Services
 
             var nombre = dto.Nombre.Trim();
 
+            // Regla de nombre único: no se repite el nombre dentro del tablero.
             if (await _context.Etiquetas.AnyAsync(e => e.TableroId == tableroId && e.Nombre == nombre, cancellationToken))
             {
                 return ResultadoOperacion<EtiquetaDto>.Fallo(nameof(dto.Nombre), "Ya existe una etiqueta con ese nombre en el tablero.");
@@ -83,6 +84,7 @@ namespace BoardyWeb.Services
 
             var nombre = dto.Nombre.Trim();
 
+            // Regla de nombre único: no se repite el nombre dentro del tablero.
             if (await _context.Etiquetas.AnyAsync(e => e.TableroId == etiqueta.TableroId && e.Nombre == nombre && e.EtiquetaId != etiquetaId, cancellationToken))
             {
                 return ResultadoOperacion<EtiquetaDto>.Fallo(nameof(dto.Nombre), "Ya existe una etiqueta con ese nombre en el tablero.");
@@ -107,6 +109,7 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion.NoExiste("La etiqueta no existe.");
             }
 
+            // No eliminación de etiquetas en uso: no puede estar asignada a tareas.
             if (await _context.TareaEtiquetas.AnyAsync(te => te.EtiquetaId == etiquetaId, cancellationToken))
             {
                 return ResultadoOperacion.Fallo("No se puede eliminar una etiqueta que está asignada a tareas.");
@@ -133,11 +136,13 @@ namespace BoardyWeb.Services
                 return ResultadoOperacion.NoExiste("La etiqueta no existe.");
             }
 
+            // Regla de mismo tablero: la etiqueta debe ser del tablero de la tarea.
             if (tableroTareaId != tableroEtiquetaId)
             {
                 return ResultadoOperacion.Fallo("La etiqueta no pertenece al tablero de la tarea.");
             }
 
+            // No asignación duplicada: la tarea no puede tener ya esa etiqueta.
             if (await _context.TareaEtiquetas.AnyAsync(te => te.TareaId == tareaId && te.EtiquetaId == etiquetaId, cancellationToken))
             {
                 return ResultadoOperacion.Fallo("La tarea ya tiene esa etiqueta.");
