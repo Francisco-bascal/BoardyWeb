@@ -100,7 +100,8 @@ namespace BoardyWeb.Services
                 .Select(Proyectar())
                 .FirstAsync(cancellationToken);
 
-            await AvisarPorCorreoAsync(dto.Email.Trim(), resultado);
+            // shortcut: envío en segundo plano para no demorar la pantalla; si la app se reinicia justo ahí, ese aviso se pierde (la invitación no).
+            _ = Task.Run(() => AvisarPorCorreoAsync(dto.Email.Trim(), resultado), CancellationToken.None);
 
             return ResultadoOperacion<InvitacionTableroDto>.Exitoso(resultado, "Invitación enviada correctamente.");
         }

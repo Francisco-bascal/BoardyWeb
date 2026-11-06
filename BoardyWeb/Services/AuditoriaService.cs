@@ -67,7 +67,7 @@ namespace BoardyWeb.Services
         {
             return _context.RegistrosAuditoria
                 .AsNoTracking()
-                .Where(r => r.TableroId == tableroId && (usuarioId == null || r.UsuarioId == usuarioId));
+                .Where(r => r.TableroId == tableroId && (string.IsNullOrEmpty(usuarioId) || r.UsuarioId == usuarioId));
         }
 
         private static readonly Expression<Func<RegistroAuditoria, RegistroAuditoriaDto>> Proyectar = r => new RegistroAuditoriaDto

@@ -48,7 +48,7 @@
                                 <a class="nav-link@(Activo("Tableros"))" asp-area="" asp-controller="Tableros" asp-action="Index"><i class="bi bi-columns-gap me-1"></i>Tableros</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link@(Activo("Invitaciones"))" asp-area="" asp-controller="Invitaciones" asp-action="Index"><i class="bi bi-envelope me-1"></i>Invitaciones</a>
+                                <a class="nav-link@(ViewContext.RouteData.Values["action"]?.ToString() == "DelTablero" ? "" : Activo("Invitaciones"))" asp-area="" asp-controller="Invitaciones" asp-action="Index"><i class="bi bi-envelope me-1"></i>Invitaciones</a>
                             </li>
                             @if (User.IsInRole("Administrador"))
                             {

@@ -20,15 +20,18 @@ namespace BoardyWeb.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<Usuario> _userManager;
         private readonly SignInManager<Usuario> _signInManager;
         private readonly IFotoPerfilService _fotoPerfilService;
+        private readonly IUsuarioService _usuarioService;
 
         public IndexModel(
             UserManager<Usuario> userManager,
             SignInManager<Usuario> signInManager,
-            IFotoPerfilService fotoPerfilService)
+            IFotoPerfilService fotoPerfilService,
+            IUsuarioService usuarioService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _fotoPerfilService = fotoPerfilService;
+            _usuarioService = usuarioService;
         }
 
         /// <summary>
@@ -111,6 +114,31 @@ namespace BoardyWeb.Areas.Identity.Pages.Account.Manage
 
             StatusMessage = resultado.Exito ? resultado.Mensaje : "Error: " + resultado.Mensaje;
             return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostEliminarCuentaAsync(string clave)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (string.IsNullOrEmpty(clave) || !await _userManager.CheckPasswordAsync(user, clave))
+            {
+                StatusMessage = "Error: La contraseña es incorrecta.";
+                return RedirectToPage();
+            }
+
+            var resultado = await _usuarioService.EliminarCuentaAsync(user, HttpContext.RequestAborted);
+            if (!resultado.Exito)
+            {
+                StatusMessage = "Error: " + resultado.Mensaje;
+                return RedirectToPage();
+            }
+
+            await _signInManager.SignOutAsync();
+            return Redirect("~/");
         }
 
         public async Task<IActionResult> OnPostQuitarFotoAsync()

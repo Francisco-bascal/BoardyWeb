@@ -949,3 +949,8 @@ a {
   color: #fff;
   background-color: var(--boardy-acento-solido);
 }
+
+/* Resumen de validación sin errores: no debe dibujar la alerta vacía. */
+.validation-summary-valid {
+  display: none;
+}

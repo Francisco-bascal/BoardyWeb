@@ -37,6 +37,21 @@
     <button id="update-profile-button" type="submit" class="btn btn-primary">Guardar cambios</button>
 </form>
 
+<hr class="my-4" />
+<h2 class="h5 text-danger">Eliminar mi cuenta</h2>
+<p class="text-suave">Perdés el acceso y dejás todos tus tableros. Tus comentarios y acciones quedan como "Usuario eliminado". No se puede deshacer, y no podés hacerlo si sos propietario de algún tablero.</p>
+<form method="post" asp-page-handler="EliminarCuenta" style="max-width: 28rem;">
+    <div class="mb-3">
+        <label for="claveEliminar" class="form-label">Contraseña actual</label>
+        <input id="claveEliminar" name="clave" type="password" class="form-control" autocomplete="current-password" required />
+    </div>
+    <div class="form-check mb-3">
+        <input id="confirmaEliminar" type="checkbox" class="form-check-input" required />
+        <label for="confirmaEliminar" class="form-check-label">Entiendo que no se puede deshacer.</label>
+    </div>
+    <button type="submit" class="btn btn-outline-danger">Eliminar mi cuenta</button>
+</form>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
