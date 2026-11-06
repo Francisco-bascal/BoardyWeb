@@ -746,6 +746,8 @@ a {
   display: flex;
   flex-direction: column;
   gap: .55rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bs-border-color) transparent;
 }
 
 .kanban-vacio {

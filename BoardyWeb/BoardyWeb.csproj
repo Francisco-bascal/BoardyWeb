@@ -27,7 +27,7 @@
     <Folder Include="Services\" />
   </ItemGroup>
 
-	<ItemGroup>
+  <ItemGroup>
 		<Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
-	</ItemGroup>
+  </ItemGroup>
 </Project>
