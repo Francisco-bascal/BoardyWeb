@@ -71,6 +71,8 @@
 
 /* ---------- 2. Base ---------- */
 html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bs-border-color) transparent;
   font-size: 15px;
 }
 
@@ -696,6 +698,8 @@ a {
   height: calc(100vh - 16.5rem);
   min-height: 26rem;
   overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bs-border-color) transparent;
   padding-bottom: .5rem;
 }
 
