@@ -369,3 +369,6 @@ appsettings.*.json
 
 # Fotos de perfil subidas por los usuarios
 BoardyWeb/wwwroot/uploads/
+
+boardy.runasp.net-WebDeploy.publishSettings
+appsettings.Production.json
