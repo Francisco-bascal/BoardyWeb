@@ -1,4 +1,5 @@
 using BoardyWeb.Autorizacion;
+using BoardyWeb.Comun;
 using BoardyWeb.DTOs;
 using BoardyWeb.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -31,7 +32,7 @@ namespace BoardyWeb.Controllers
             {
                 // Solo los estados sin lista, más el de la lista que se está editando.
                 var listas = await _listaTareaService.ListarAsync(tableroId, cancellationToken);
-                var estados = (await _estadoTareaService.ListarAsync(cancellationToken))
+                var estados = (await _estadoTareaService.ListarAsync(tableroId, cancellationToken))
                     .Where(e => !listas.Any(l => l.EstadoTareaId == e.EstadoTareaId && l.ListaTareaId != listaTareaId))
                     .ToList();
                 ViewData["Estados"] = new SelectList(estados, nameof(EstadoTareaDto.EstadoTareaId), nameof(EstadoTareaDto.Nombre));
@@ -48,6 +49,13 @@ namespace BoardyWeb.Controllers
 
             ViewData["TableroId"] = tableroId;
             await CargarEstadosAsync(tableroId, null, cancellationToken);
+
+            // Regla de estado disponible: en Kanban no se crea una lista si todos los estados ya tienen la suya.
+            if (ViewData["Estados"] is SelectList estadosLibres && !estadosLibres.Any())
+            {
+                return Responder(ResultadoOperacion.Fallo("Todos los estados ya tienen su lista. Creá un estado nuevo en Estados del tablero."), IrATablero(tableroId));
+            }
+
             return VistaFormulario(new CrearListaTareaDto());
         }
 

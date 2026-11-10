@@ -13,18 +13,21 @@ namespace BoardyWeb.Controllers
         private readonly IListaTareaService _listaTareaService;
         private readonly ITareaService _tareaService;
         private readonly IReporteService _reporteService;
+        private readonly IEstadoTareaService _estadoTareaService;
 
         public TablerosController(
             ITableroService tableroService,
             IListaTareaService listaTareaService,
             ITareaService tareaService,
             IReporteService reporteService,
+            IEstadoTareaService estadoTareaService,
             IAuthorizationService autorizacion) : base(autorizacion)
         {
             _tableroService = tableroService;
             _listaTareaService = listaTareaService;
             _tareaService = tareaService;
             _reporteService = reporteService;
+            _estadoTareaService = estadoTareaService;
         }
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
@@ -55,7 +58,8 @@ namespace BoardyWeb.Controllers
                 UsuarioActualId = UsuarioId,
                 PuedeColaborar = await TienePermisoAsync(id, PoliticasTablero.ColaborarEnTablero),
                 PuedeAdministrar = await TienePermisoAsync(id, PoliticasTablero.AdministrarTablero),
-                PuedeGestionar = await TienePermisoAsync(id, PoliticasTablero.GestionarTablero)
+                PuedeGestionar = await TienePermisoAsync(id, PoliticasTablero.GestionarTablero),
+                PuedeCrearLista = !tablero.Datos!.EsKanban || await _estadoTareaService.ContarSinListaAsync(id, cancellationToken) > 0
             };
 
             ViewData["AbrirTarea"] = tarea;

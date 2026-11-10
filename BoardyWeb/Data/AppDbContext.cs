@@ -130,7 +130,8 @@ namespace BoardyWeb.Data
             modelBuilder.Entity<EstadoTarea>(entity =>
             {
                 entity.HasKey(e => e.EstadoTareaId);
-                entity.HasIndex(e => e.Nombre).IsUnique();
+                entity.HasIndex(e => new { e.TableroId, e.Nombre }).IsUnique();
+                entity.HasOne(e => e.Tablero).WithMany(t => t.EstadosTarea).HasForeignKey(e => e.TableroId).OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<TareaMiembro>(entity =>

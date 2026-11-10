@@ -23,12 +23,16 @@
         <div class="d-flex flex-wrap gap-2">
             <a asp-controller="Miembros" asp-action="Index" asp-route-tableroId="@tablero.TableroId" class="btn btn-outline-secondary"><i class="bi bi-people me-1"></i>Miembros</a>
             <a asp-controller="Etiquetas" asp-action="Index" asp-route-tableroId="@tablero.TableroId" class="btn btn-outline-secondary"><i class="bi bi-tags me-1"></i>Etiquetas</a>
+            <a asp-controller="EstadosTarea" asp-action="Index" asp-route-tableroId="@tablero.TableroId" class="btn btn-outline-secondary"><i class="bi bi-list-check me-1"></i>Estados</a>
             <a asp-controller="Tableros" asp-action="ReportePdf" asp-route-id="@tablero.TableroId" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a>
             @if (Model.PuedeAdministrar)
             {
                 <a asp-controller="Invitaciones" asp-action="DelTablero" asp-route-tableroId="@tablero.TableroId" class="btn btn-outline-secondary"><i class="bi bi-envelope-plus me-1"></i>Invitaciones</a>
                 <a asp-controller="Auditoria" asp-action="Index" asp-route-tableroId="@tablero.TableroId" class="btn btn-outline-secondary"><i class="bi bi-clock-history me-1"></i>Auditoría</a>
+                @if (Model.PuedeCrearLista)
+                {
                 <button type="button" class="btn btn-primary" data-modal-url="@Url.Action("Crear", "ListasTarea", new { tableroId = tablero.TableroId })"><i class="bi bi-plus-lg me-1"></i>Nueva lista</button>
+                }
             }
             @if (Model.PuedeAdministrar)
             {

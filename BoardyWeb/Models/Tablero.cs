@@ -27,6 +27,8 @@ namespace BoardyWeb.Models
 
         public ICollection<Etiqueta> Etiquetas { get; set; } = new List<Etiqueta>();
 
+        public ICollection<EstadoTarea> EstadosTarea { get; set; } = new List<EstadoTarea>();
+
         public ICollection<TableroMiembro> Miembros { get; set; } = new List<TableroMiembro>();
 
         public ICollection<InvitacionTablero> Invitaciones { get; set; } = new List<InvitacionTablero>();

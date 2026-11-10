@@ -1,4 +1,5 @@
 using BoardyWeb.Autorizacion;
+using BoardyWeb.Comun;
 using BoardyWeb.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,6 @@ namespace BoardyWeb.Data
             await context.Database.MigrateAsync();
 
             await SeedRolesIdentityAsync(scope.ServiceProvider);
-            await SeedEstadosTareaAsync(context);
             await SeedRolesMiembroAsync(context);
             var administrador = await SeedAdministradorAsync(scope.ServiceProvider);
             await SeedTableroDemoAsync(context, administrador);
@@ -36,22 +36,6 @@ namespace BoardyWeb.Data
                     await roleManager.CreateAsync(new IdentityRole(nombre));
                 }
             }
-        }
-
-        private static async Task SeedEstadosTareaAsync(AppDbContext context)
-        {
-            if (await context.EstadoTareas.AnyAsync())
-            {
-                return;
-            }
-
-            context.EstadoTareas.AddRange(
-                new EstadoTarea { Nombre = "Pendiente", Descripcion = "La tarea todavía no comenzó." },
-                new EstadoTarea { Nombre = "En progreso", Descripcion = "La tarea está siendo trabajada." },
-                new EstadoTarea { Nombre = "En revisión", Descripcion = "La tarea espera revisión." },
-                new EstadoTarea { Nombre = "Finalizada", Descripcion = "La tarea fue completada." });
-
-            await context.SaveChangesAsync();
         }
 
         private static async Task SeedEtiquetasTableroDemoAsync(AppDbContext context)
@@ -143,7 +127,7 @@ namespace BoardyWeb.Data
                 return;
             }
 
-            var estados = await context.EstadoTareas.OrderBy(e => e.EstadoTareaId).ToListAsync();
+            var estados = EstadosTareaSistema.CrearBase();
             var rolPropietario = await context.RolMiembros.FirstAsync(r => r.Nombre == RolesTablero.Propietario);
 
             var tablero = new Tablero
@@ -153,6 +137,7 @@ namespace BoardyWeb.Data
                 PropietarioId = administrador.Id,
                 EsKanban = true
             };
+            estados.ForEach(tablero.EstadosTarea.Add);
 
             tablero.Miembros.Add(new TableroMiembro
             {
@@ -168,9 +153,9 @@ namespace BoardyWeb.Data
                 }
             });
 
-            var listaPendiente = new ListaTarea { Nombre = "Pendiente", Orden = 1, EstadoTareaId = estados[0].EstadoTareaId };
-            var listaEnProgreso = new ListaTarea { Nombre = "En progreso", Orden = 2, EstadoTareaId = estados[1].EstadoTareaId };
-            var listaFinalizada = new ListaTarea { Nombre = "Finalizada", Orden = 3, EstadoTareaId = estados[3].EstadoTareaId };
+            var listaPendiente = new ListaTarea { Nombre = "Pendiente", Orden = 1, EstadoTarea = estados[0] };
+            var listaEnProgreso = new ListaTarea { Nombre = "En progreso", Orden = 2, EstadoTarea = estados[1] };
+            var listaFinalizada = new ListaTarea { Nombre = "Finalizada", Orden = 3, EstadoTarea = estados[2] };
 
             listaPendiente.Tareas.Add(new Tarea
             {
@@ -178,7 +163,7 @@ namespace BoardyWeb.Data
                 Descripcion = "Acordar con el equipo las columnas y el flujo de trabajo.",
                 Prioridad = PrioridadTarea.Alta,
                 Orden = 1,
-                EstadoTareaId = estados[0].EstadoTareaId
+                EstadoTarea = estados[0]
             });
 
             listaPendiente.Tareas.Add(new Tarea
@@ -187,7 +172,7 @@ namespace BoardyWeb.Data
                 Descripcion = "Revisar el catálogo de etiquetas disponibles.",
                 Prioridad = PrioridadTarea.Media,
                 Orden = 2,
-                EstadoTareaId = estados[0].EstadoTareaId
+                EstadoTarea = estados[0]
             });
 
             listaEnProgreso.Tareas.Add(new Tarea
@@ -197,7 +182,7 @@ namespace BoardyWeb.Data
                 Prioridad = PrioridadTarea.Alta,
                 Orden = 1,
                 FechaVencimiento = DateTime.UtcNow.AddDays(7),
-                EstadoTareaId = estados[1].EstadoTareaId
+                EstadoTarea = estados[1]
             });
 
             listaFinalizada.Tareas.Add(new Tarea
@@ -206,7 +191,7 @@ namespace BoardyWeb.Data
                 Descripcion = "Registro, inicio de sesión y roles de usuario.",
                 Prioridad = PrioridadTarea.Alta,
                 Orden = 1,
-                EstadoTareaId = estados[3].EstadoTareaId
+                EstadoTarea = estados[2]
             });
 
             tablero.ListasTarea.Add(listaPendiente);

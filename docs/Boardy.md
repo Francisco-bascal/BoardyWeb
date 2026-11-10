@@ -40,7 +40,7 @@ Decisiones clave:
 
 ## Dominio
 
-`Usuario` · `Tablero` · `ListaTarea` · `Tarea` · `EstadoTarea` · `Etiqueta` (por tablero) · `Comentario` · `InvitacionTablero` · `TableroMiembro` + `MiembrosPorRol` + `RolMiembro` (cada miembro tiene un único rol por tablero, garantizado con un índice único) · `TareaMiembro` (encargados) · `TareaEtiqueta`.
+`Usuario` · `Tablero` · `ListaTarea` · `Tarea` · `EstadoTarea` y `Etiqueta` (por tablero) · `Comentario` · `InvitacionTablero` · `TableroMiembro` + `MiembrosPorRol` + `RolMiembro` (cada miembro tiene un único rol por tablero, garantizado con un índice único) · `TareaMiembro` (encargados) · `TareaEtiqueta`.
 
 Enums guardados como texto: `PrioridadTarea` (Baja, Media, Alta, Urgente) y `EstadoInvitacion`.
 
@@ -48,7 +48,7 @@ Enums guardados como texto: `PrioridadTarea` (Baja, Media, Alta, Urgente) y `Est
 
 Hay dos niveles de roles:
 
-- **Globales (Identity)**: `Administrador` accede a los catálogos (estados y roles de miembro).
+- **Globales (Identity)**: `Administrador` gestiona usuarios y su rol global, y ve los logs de error. Los 4 roles de miembro son fijos.
 - **Por tablero**: Propietario, Administrador, Operario y Lector, resueltos con **autorización por políticas** (`AuthorizationHandler`) que consultan la base.
 
 | Acción | Propietario | Administrador | Operario | Lector |
@@ -82,7 +82,8 @@ Políticas: `VerTablero`, `ColaborarEnTablero`, `AdministrarTablero`, `Gestionar
 
 - **Esquema del tablero** (`Tablero.EsKanban`, se elige al crearlo): en Kanban cada lista tiene un estado obligatorio (`ListaTarea.EstadoTareaId`), mover una tarea cambia su estado y cambiar el estado la mueve a la lista correspondiente. En esquema libre las listas no tienen estado.
 - **Mi panel**: tareas abiertas asignadas al usuario, por tablero; el clic abre la tarea en su tablero.
-- **Plataforma** (rol global Administrador): usuarios (activar/desactivar, rol Administrador), catálogos y logs de error.
+- **Estados de tarea por tablero**: cada tablero nace con Pendiente, En progreso y Finalizada, que son inmutables. Propietario y Administrador agregan estados propios, que solo se eliminan si no los usa ninguna tarea ni lista. En Kanban, si no queda un estado sin lista, no se puede crear otra lista.
+- **Plataforma** (rol global Administrador): usuarios (activar/desactivar, rol Administrador) y logs de error.
 - **Auditoría del tablero** (Propietario y Administrador): lista cronológica con filtro por usuario.
 
 ## Auditoría, errores, fotos y reportes
@@ -105,7 +106,7 @@ En Mi cuenta → Perfil, con contraseña. Se rechaza si el usuario es propietari
 ## Puesta en marcha
 
 1. Crear `BoardyWeb/appsettings.Development.json` (no se versiona, está en `.gitignore`) con `ConnectionStrings:DefaultConnection` y las secciones `Smtp` y `Gemini`.
-2. Ejecutar `dotnet run` dentro de `BoardyWeb/`: aplica las migraciones y siembra roles, estados de tarea, un usuario administrador y un tablero de demostración.
+2. Ejecutar `dotnet run` dentro de `BoardyWeb/`: aplica las migraciones y siembra roles, un usuario administrador y un tablero de demostración.
 3. Usuario semilla: `admin@boardy.local` (la contraseña está definida en `Data/DbSeeder.cs`; conviene moverla a configuración antes de publicar).
 
 ## Pendiente

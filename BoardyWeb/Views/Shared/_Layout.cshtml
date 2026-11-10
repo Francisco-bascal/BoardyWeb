@@ -1,7 +1,7 @@
 ﻿@{
     var controlador = ViewContext.RouteData.Values["controller"]?.ToString();
     string Activo(string nombre) => string.Equals(controlador, nombre, StringComparison.OrdinalIgnoreCase) ? " active" : "";
-    var enPlataforma = controlador is "Plataforma" or "EstadosTarea" or "RolesMiembro";
+    var enPlataforma = controlador is "Plataforma";
 }
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="light">

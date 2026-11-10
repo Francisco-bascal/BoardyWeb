@@ -184,7 +184,7 @@ namespace BoardyWeb.Services
             }
 
             // Regla de estado obligatorio: en Kanban cada lista necesita un estado válido.
-            if (estadoTareaId is null || !await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == estadoTareaId, cancellationToken))
+            if (estadoTareaId is null || !await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == estadoTareaId && e.TableroId == tableroId, cancellationToken))
             {
                 return (null, "Debés seleccionar un estado.");
             }

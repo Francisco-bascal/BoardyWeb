@@ -76,7 +76,7 @@ namespace BoardyWeb.Services
             var estadoTareaId = lista.EstadoTareaId ?? dto.EstadoTareaId;
 
             // Regla de estado existente: el estado de la tarea debe estar en el catálogo.
-            if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == estadoTareaId, cancellationToken))
+            if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == estadoTareaId && e.TableroId == lista.TableroId, cancellationToken))
             {
                 return ResultadoOperacion<TareaDto>.Fallo(nameof(dto.EstadoTareaId), "El estado seleccionado no existe.");
             }
@@ -118,7 +118,7 @@ namespace BoardyWeb.Services
             var estadoTareaId = tarea.ListaTarea.EstadoTareaId ?? dto.EstadoTareaId;
 
             // Regla de estado existente: el estado de la tarea debe estar en el catálogo.
-            if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == estadoTareaId, cancellationToken))
+            if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == estadoTareaId && e.TableroId == tarea.ListaTarea.TableroId, cancellationToken))
             {
                 return ResultadoOperacion<TareaDto>.Fallo(nameof(dto.EstadoTareaId), "El estado seleccionado no existe.");
             }
@@ -216,7 +216,7 @@ namespace BoardyWeb.Services
             }
 
             // Regla de estado existente: el estado de la tarea debe estar en el catálogo.
-            if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == dto.EstadoTareaId, cancellationToken))
+            if (!await _context.EstadoTareas.AnyAsync(e => e.EstadoTareaId == dto.EstadoTareaId && e.TableroId == tarea.ListaTarea.TableroId, cancellationToken))
             {
                 return ResultadoOperacion<TareaDto>.Fallo(nameof(dto.EstadoTareaId), "El estado seleccionado no existe.");
             }

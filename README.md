@@ -13,7 +13,8 @@ Aplicación web de tableros de tareas para equipos de desarrollo: cada usuario c
 - **Reportes PDF** del tablero, de mis tareas y de la auditoría.
 - **Asistente con Gemini:** explica el uso y resume tareas; no puede modificar datos.
 - **Cuenta:** confirmación por correo, recuperación de contraseña, foto de perfil y eliminación de la cuenta propia.
-- **Plataforma** para administradores: usuarios, catálogos y logs de error.
+- **Estados de tarea por tablero:** 3 base inmutables y estados propios.
+- **Plataforma** para administradores: usuarios y logs de error.
 - Tema diurno y nocturno.
 
 ## Tecnologías
@@ -25,7 +26,7 @@ Arquitectura en capas: Controlador → Servicio → EF Core → SQL Server.
 ## Puesta en marcha
 
 1. Crear `BoardyWeb/appsettings.Development.json` (Git lo ignora) con las claves de la tabla siguiente, en formato JSON (`Smtp:Clave`, `Gemini:ApiKey`, etc.).
-2. Dentro de `BoardyWeb/`, ejecutar `dotnet run`. Aplica las migraciones y crea roles, estados, un usuario administrador y un tablero de demostración.
+2. Dentro de `BoardyWeb/`, ejecutar `dotnet run`. Aplica las migraciones y crea roles, un usuario administrador y un tablero de demostración.
 
 ## Configuración
 

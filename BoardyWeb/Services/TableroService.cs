@@ -82,22 +82,17 @@ namespace BoardyWeb.Services
                 EsKanban = dto.EsKanban
             };
 
+            // Regla de estados base: todo tablero nace con sus 3 estados inmutables.
+            var estados = EstadosTareaSistema.CrearBase();
+            estados.ForEach(tablero.EstadosTarea.Add);
+
+            // Regla de esquema Kanban: arranca con una lista por cada estado base.
             if (dto.EsKanban)
             {
-                var estados = await _context.EstadoTareas
-                    .Where(e => EstadosTareaSistema.Todos.Contains(e.Nombre))
-                    .ToDictionaryAsync(e => e.Nombre, e => e.EstadoTareaId, cancellationToken);
-
-                // Regla de esquema Kanban: arranca con una lista por cada estado del sistema.
-                if (estados.Count != EstadosTareaSistema.Todos.Length)
-                {
-                    return ResultadoOperacion<TableroDto>.Fallo("No están configurados los estados de tarea de Kanban.");
-                }
-
                 var orden = 1;
-                foreach (var nombre in EstadosTareaSistema.Todos)
+                foreach (var estado in estados)
                 {
-                    tablero.ListasTarea.Add(new ListaTarea { Nombre = nombre, Orden = orden++, EstadoTareaId = estados[nombre] });
+                    tablero.ListasTarea.Add(new ListaTarea { Nombre = estado.Nombre, Orden = orden++, EstadoTarea = estado });
                 }
             }
 

@@ -79,9 +79,12 @@ namespace BoardyWeb.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("TableroId")
+                        .HasColumnType("int");
+
                     b.HasKey("EstadoTareaId");
 
-                    b.HasIndex("Nombre")
+                    b.HasIndex("TableroId", "Nombre")
                         .IsUnique();
 
                     b.ToTable("EstadoTareas");
@@ -745,6 +748,17 @@ namespace BoardyWeb.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("BoardyWeb.Models.EstadoTarea", b =>
+                {
+                    b.HasOne("BoardyWeb.Models.Tablero", "Tablero")
+                        .WithMany("EstadosTarea")
+                        .HasForeignKey("TableroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tablero");
+                });
+
             modelBuilder.Entity("BoardyWeb.Models.Etiqueta", b =>
                 {
                     b.HasOne("BoardyWeb.Models.Tablero", "Tablero")
@@ -1001,6 +1015,8 @@ namespace BoardyWeb.Migrations
 
             modelBuilder.Entity("BoardyWeb.Models.Tablero", b =>
                 {
+                    b.Navigation("EstadosTarea");
+
                     b.Navigation("Etiquetas");
 
                     b.Navigation("Invitaciones");

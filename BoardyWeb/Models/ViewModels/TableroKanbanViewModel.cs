@@ -18,5 +18,8 @@ namespace BoardyWeb.Models.ViewModels
         public bool PuedeAdministrar { get; set; }
 
         public bool PuedeGestionar { get; set; }
+
+        // En Kanban hace falta un estado sin lista para crear una lista nueva.
+        public bool PuedeCrearLista { get; set; }
     }
 }

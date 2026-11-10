@@ -11,6 +11,8 @@ namespace BoardyWeb.DTOs
         public string Descripcion { get; set; } = string.Empty;
 
         public int CantidadTareas { get; set; }
+
+        public bool EsBase { get; set; }
     }
 
     public class CrearEstadoTareaDto
@@ -74,19 +76,4 @@ namespace BoardyWeb.DTOs
         public int CantidadMiembros { get; set; }
     }
 
-    public class CrearRolMiembroDto
-    {
-        [Required(ErrorMessage = "El nombre es obligatorio")]
-        [StringLength(100, ErrorMessage = "El nombre no puede superar los {1} caracteres.")]
-        [Display(Name = "Nombre")]
-        public string Nombre { get; set; } = string.Empty;
-
-        [StringLength(500, ErrorMessage = "La descripción no puede superar los {1} caracteres.")]
-        [Display(Name = "Descripción")]
-        public string Descripcion { get; set; } = string.Empty;
-    }
-
-    public class ActualizarRolMiembroDto : CrearRolMiembroDto
-    {
-    }
 }

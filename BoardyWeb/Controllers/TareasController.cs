@@ -50,7 +50,7 @@ namespace BoardyWeb.Controllers
             }
 
             // En Kanban solo se ofrecen los estados que tienen una lista adonde mover la tarea.
-            var estados = await _estadoTareaService.ListarAsync(cancellationToken);
+            var estados = await _estadoTareaService.ListarAsync(tableroId, cancellationToken);
             var listas = await _listaTareaService.ListarAsync(tableroId, cancellationToken);
             if (listas.First(l => l.ListaTareaId == tarea.Datos!.ListaTareaId).EstadoTareaId is not null)
             {
@@ -317,7 +317,8 @@ namespace BoardyWeb.Controllers
                 return;
             }
 
-            var estados = await _estadoTareaService.ListarAsync(cancellationToken);
+            var tableroId = await _listaTareaService.ObtenerTableroIdAsync(listaTareaId, cancellationToken);
+            var estados = await _estadoTareaService.ListarAsync(tableroId ?? 0, cancellationToken);
             ViewData["Estados"] = new SelectList(estados, nameof(EstadoTareaDto.EstadoTareaId), nameof(EstadoTareaDto.Nombre));
         }
 
