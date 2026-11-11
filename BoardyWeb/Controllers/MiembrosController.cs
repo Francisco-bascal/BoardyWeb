@@ -46,25 +46,6 @@ namespace BoardyWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Agregar(int tableroId, AgregarMiembroDto dto, CancellationToken cancellationToken)
-        {
-            var acceso = await ValidarAccesoAsync(tableroId, PoliticasTablero.AdministrarTablero);
-            if (acceso is not null)
-            {
-                return acceso;
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return DatosInvalidos(VolverAIndex(tableroId));
-            }
-
-            var resultado = await _miembroService.AgregarAsync(tableroId, dto, cancellationToken);
-            return Responder(resultado, VolverAIndex(tableroId));
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CambiarRol(int tableroId, int tableroMiembroId, AsignarRolDto dto, CancellationToken cancellationToken)
         {
             var acceso = await ValidarAccesoAsync(tableroId, PoliticasTablero.AdministrarTablero);

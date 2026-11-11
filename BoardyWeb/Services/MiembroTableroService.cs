@@ -23,52 +23,6 @@ namespace BoardyWeb.Services
             return await ConsultarMiembros(tableroId).ToListAsync(cancellationToken);
         }
 
-        public async Task<ResultadoOperacion<TableroMiembroDto>> AgregarAsync(int tableroId, AgregarMiembroDto dto, CancellationToken cancellationToken = default)
-        {
-            var email = dto.Email.Trim().ToUpperInvariant();
-
-            var usuarioId = await _context.Users
-                .Where(u => u.NormalizedEmail == email && u.Estado)
-                .Select(u => u.Id)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            // Regla de usuario activo: solo se agrega a un usuario existente y activo.
-            if (usuarioId is null)
-            {
-                return ResultadoOperacion<TableroMiembroDto>.Fallo(nameof(dto.Email), "No existe un usuario activo con ese email.");
-            }
-
-            // No duplicación de miembros: el usuario no puede pertenecer ya al tablero.
-            if (await _context.TableroMiembros.AnyAsync(m => m.TableroId == tableroId && m.UsuarioId == usuarioId, cancellationToken))
-            {
-                return ResultadoOperacion<TableroMiembroDto>.Fallo(nameof(dto.Email), "El usuario ya es miembro del tablero.");
-            }
-
-            var errorRol = await ValidarRolAsignableAsync(dto.RolMiembroId, cancellationToken);
-            if (errorRol is not null)
-            {
-                return ResultadoOperacion<TableroMiembroDto>.Fallo(nameof(dto.RolMiembroId), errorRol);
-            }
-
-            var ahora = DateTime.UtcNow;
-            var miembro = new TableroMiembro
-            {
-                TableroId = tableroId,
-                UsuarioId = usuarioId,
-                FechaAsignacion = ahora,
-                Roles = new List<MiembrosPorRol>
-                {
-                    new() { RolMiembroId = dto.RolMiembroId, FechaAsignacion = ahora }
-                }
-            };
-
-            _context.TableroMiembros.Add(miembro);
-            _auditoria.Registrar(tableroId, $"Agregó a {dto.Email} como miembro.");
-            await _context.SaveChangesAsync(cancellationToken);
-
-            return await ObtenerMiembroAsync(tableroId, miembro.TableroMiembroId, "Miembro agregado correctamente.", cancellationToken);
-        }
-
         public async Task<ResultadoOperacion<TableroMiembroDto>> CambiarRolAsync(int tableroId, int tableroMiembroId, AsignarRolDto dto, CancellationToken cancellationToken = default)
         {
             var miembro = await _context.TableroMiembros

@@ -19,18 +19,6 @@ namespace BoardyWeb.DTOs
         public IReadOnlyList<RolMiembroDto> Roles { get; set; } = new List<RolMiembroDto>();
     }
 
-    public class AgregarMiembroDto
-    {
-        [Required(ErrorMessage = "El correo electrónico es obligatorio")]
-        [EmailAddress(ErrorMessage = "El correo electrónico no es válido")]
-        [Display(Name = "Correo electrónico")]
-        public string Email { get; set; } = string.Empty;
-
-        [Range(1, int.MaxValue, ErrorMessage = "Debés seleccionar un rol.")]
-        [Display(Name = "Rol")]
-        public int RolMiembroId { get; set; }
-    }
-
     public class AsignarRolDto
     {
         [Range(1, int.MaxValue, ErrorMessage = "Debés seleccionar un rol.")]

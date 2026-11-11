@@ -2,7 +2,6 @@
 @{
     ViewData["Title"] = "Miembros";
     var tableroId = ViewData["TableroId"];
-    var roles = ViewData["Roles"] as SelectList;
 }
 
 <div class="pagina-encabezado">
@@ -11,25 +10,5 @@
         <h1>Miembros del tablero</h1>
     </div>
 </div>
-
-@if (ViewData["PuedeAdministrar"] is true)
-{
-    <div class="card mb-4">
-        <div class="card-body">
-            <form asp-action="Agregar" asp-route-tableroId="@tableroId" method="post" class="row g-2 align-items-center"
-                  data-ajax="true" data-ajax-method="post" data-ajax-success="ajaxFormExito" data-ajax-failure="ajaxFormFallo">
-                <div class="col-md-5">
-                    <input name="Email" type="email" class="form-control" placeholder="Correo del usuario a agregar" required />
-                </div>
-                <div class="col-md-4">
-                    <select name="RolMiembroId" class="form-select" asp-items="roles"></select>
-                </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-person-plus me-1"></i>Agregar miembro</button>
-                </div>
-            </form>
-        </div>
-    </div>
-}
 
 <partial name="_Lista" model="Model" />
