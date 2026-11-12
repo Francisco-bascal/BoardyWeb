@@ -39,6 +39,16 @@ Arquitectura en capas: Controlador → Servicio → EF Core → SQL Server.
 
 En el hosting, los secretos van en variables de entorno, con `__` en lugar de `:` (por ejemplo, `Smtp__Clave` y `Gemini__ApiKey`). Las credenciales nunca se versionan.
 
+## Credenciales
+
+Solicitadas por el docente como requisito de aprobación.
+
+| Usuario | Nombre de usuario | Contraseña |
+|---|---|---|
+| Administrador | `admin@boardy.local` | `Admin123$` |
+| Usuario de prueba | `prueba@gmail.com` | `Prueba123$` |
+| Otro usuario de prueba | `desarrollo@gmail.com` | `Desarrollo123$` |
+
 ## Documentación
 
 El detalle de arquitectura, permisos y decisiones está en [docs/Boardy.md](docs/Boardy.md).

@@ -22,19 +22,23 @@ namespace BoardyWeb.Services
             var smtp = _configuracion.GetSection("Smtp");
             var servidor = smtp["Servidor"];
 
+            //Validación de servidor configurado
             if (string.IsNullOrWhiteSpace(servidor))
             {
                 throw new InvalidOperationException("Falta configurar la sección Smtp.");
             }
 
+            //Construcción del cliente SMTP
             using var cliente = new SmtpClient(servidor, smtp.GetValue<int>("Puerto"))
             {
                 EnableSsl = true,
                 Credentials = new NetworkCredential(smtp["Usuario"], smtp["Clave"])
             };
 
+            //Construcción del mensaje
             using var mensaje = new MailMessage(smtp["Remitente"]!, email, subject, htmlMessage) { IsBodyHtml = true };
 
+            //Envío del mensaje con el cliente SMTP
             await cliente.SendMailAsync(mensaje);
         }
     }

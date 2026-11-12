@@ -60,12 +60,9 @@ namespace BoardyWeb.Areas.Identity.Pages.Account
                 // Regla de no revelación: responde igual si el correo no existe o no está confirmado.
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
-                    // Don't reveal that the user does not exist or is not confirmed
                     return RedirectToPage("./ForgotPasswordConfirmation");
                 }
 
-                // For more information on how to enable account confirmation and password reset please
-                // visit https://go.microsoft.com/fwlink/?LinkID=532713
                 // Token de un solo uso atado al usuario.
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -75,14 +72,17 @@ namespace BoardyWeb.Areas.Identity.Pages.Account
                     values: new { area = "Identity", code },
                     protocol: Request.Scheme);
 
+                //Envío del email
                 await _emailSender.SendEmailAsync(
                     Input.Email,
                     "Restablecer contraseña",
                     $"Restablecé tu contraseña haciendo <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clic aquí</a>.");
 
+                //Si es exitoso se muestra la página de revisar el mail
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }
 
+            //Si algo falla y se llega hasta acá se vuelve a la página de inicio
             return Page();
         }
     }
