@@ -107,4 +107,4 @@ En Mi cuenta → Perfil, con contraseña. Se rechaza si el usuario es propietari
 
 1. Crear `BoardyWeb/appsettings.Development.json` (no se versiona, está en `.gitignore`) con `ConnectionStrings:DefaultConnection` y las secciones `Smtp` y `Gemini`.
 2. Ejecutar `dotnet run` dentro de `BoardyWeb/`: aplica las migraciones y siembra roles, un usuario administrador y un tablero de demostración.
-3. Usuario semilla: `admin@boardy.local` (la contraseña está definida en `Data/DbSeeder.cs`; conviene moverla a configuración antes de publicar).
+3. Usuario semilla: `admin@boardy.local`.
